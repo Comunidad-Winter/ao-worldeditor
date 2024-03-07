@@ -1,127 +1,86 @@
 Attribute VB_Name = "modDeclaraciones"
+'**************************************************************
+'This program is free software; you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation; either version 2 of the License, or
+'any later version.
+'
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
+'
+'You should have received a copy of the GNU General Public License
+'along with this program; if not, write to the Free Software
+'Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+'
+'Argentum Online is based on Baronsoft's VB6 Online RPG
+'You can contact the original creator of ORE at aaron@baronsoft.com
+'for more information about ORE please visit http://www.baronsoft.com/
+'**************************************************************
+
+''
+' modDeclaraciones
+'
+' @remarks Declaraciones
+' @author ^[GS]^
+' @version 0.1.12
+' @date 20081218
+
 Option Explicit
 
-Public ToWorldMap2 As Boolean
-Public Radio As Byte
+Public FileManager           As clsIniManager
 
-Public Const PI     As Single = 3.14159265358979 'Numero PI
+Public Meteo                 As New clsMeteo
+Public Audio                 As New clsAudio
 
-'RGB Type
-Public Type RGB
-
-    R As Long
-    G As Long
-    B As Long
-
-End Type
-
-'Particle Groups
-Public TotalStreams As Integer
-Public StreamData() As Stream
-
-Public Type Stream
-
-    name As String
-    NumOfParticles As Long
-    NumGrhs As Long
-    ID As Long
-    X1 As Long
-    Y1 As Long
-    X2 As Long
-    Y2 As Long
-    angle As Long
-    vecx1 As Long
-    vecx2 As Long
-    vecy1 As Long
-    vecy2 As Long
-    life1 As Long
-    life2 As Long
-    friction As Long
-    spin As Byte
-    spin_speedL As Single
-    spin_speedH As Single
-    AlphaBlend As Byte
-    gravity As Byte
-    grav_strength As Long
-    bounce_strength As Long
-    XMove As Byte
-    YMove As Byte
-    move_x1 As Long
-    move_x2 As Long
-    move_y1 As Long
-    move_y2 As Long
-    grh_list() As Long
-    colortint(0 To 3) As RGB
-    
-    Speed As Single
-    life_counter As Long
-
-    Radio As Integer
-
-End Type
-
-Public POSX                As String
-
-Public MapData_Adyacente() As MapBlock
-
-Public LightIluminado(3)   As Long
-
-Public Const MSGMod        As String = "Este mapa há sido modificado." & vbCrLf & "Si no lo guardas perderas todos los cambios ¿Deseas guardarlo?"
-Public Const MSGDang       As String = "CUIDADO! Este comando puede arruinar el mapa." & vbCrLf & "¿Estas seguro que desea continuar?"
-Public Const ENDL          As String * 2 = vbCrLf
+Public Const MSGMod          As String = "Este mapa ha sido modificado." & vbCrLf & "Si no lo guardas perderas todos los cambios Deseas guardarlo?"
+Public Const MSGDang         As String = "CUIDADO! Este comando puede arruinar el mapa." & vbCrLf & "Estas seguro que desea continuar?"
+Public Const ENDL            As String * 2 = vbCrLf
 
 '[Loopzer]
-Public SeleccionIX         As Integer
-Public SeleccionFX         As Integer
-Public SeleccionIY         As Integer
-Public SeleccionFY         As Integer
-Public SeleccionAncho      As Integer
-Public SeleccionAlto       As Integer
-Public Seleccionando       As Boolean
-Public SeleccionMap()      As MapBlock
-
-Public DeSeleccionOX       As Integer
-Public DeSeleccionOY       As Integer
-Public DeSeleccionIX       As Integer
-Public DeSeleccionFX       As Integer
-Public DeSeleccionIY       As Integer
-Public DeSeleccionFY       As Integer
-Public DeSeleccionAncho    As Integer
-Public DeSeleccionAlto     As Integer
-Public DeSeleccionando     As Boolean
-Public DeSeleccionMap()    As MapBlock
-
-Public VerBlockeados       As Boolean
-Public VerTriggers         As Boolean
-Public VerGrilla           As Boolean ' grilla
-Public VerCapa1            As Boolean
-Public VerCapa2            As Boolean
-Public VerCapa3            As Boolean
-Public VerCapa4            As Boolean
-Public VerTranslados       As Boolean
-Public VerObjetos          As Boolean
-Public VerNpcs             As Boolean
+Public SeleccionIX           As Integer
+Public SeleccionFX           As Integer
+Public SeleccionIY           As Integer
+Public SeleccionFY           As Integer
+Public SeleccionAncho        As Integer
+Public SeleccionAlto         As Integer
+Public Seleccionando         As Boolean
+Public SeleccionMap()        As MapBlock
+Public DeSeleccionOX         As Integer
+Public DeSeleccionOY         As Integer
+Public DeSeleccionIX         As Integer
+Public DeSeleccionFX         As Integer
+Public DeSeleccionIY         As Integer
+Public DeSeleccionFY         As Integer
+Public DeSeleccionAncho      As Integer
+Public DeSeleccionAlto       As Integer
+Public DeSeleccionando       As Boolean
+Public DeSeleccionMap()      As MapBlock
+Public VerBlockeados         As Boolean
+Public VerTriggers           As Boolean
+Public VerGrilla             As Boolean ' grilla
+Public VerCapa1              As Boolean
+Public VerCapa2              As Boolean
+Public VerCapa3              As Boolean
+Public VerCapa4              As Boolean
+Public VerTranslados         As Boolean
+Public VerObjetos            As Boolean
+Public VerNpcs               As Boolean
 '[/Loopzer]
-
-Public Type tCabecera 'Cabecera de los con
-
-    desc As String * 255
-    CRC As Long
-    MagicWord As Long
-
-End Type
-
-Public MiCabecera            As tCabecera
 
 ' Objeto de Translado
 Public Cfg_TrOBJ             As Integer
 
 'Path
-Public IniPath               As String
+Public inipath               As String
+Public DirGraficos           As String
+Public DirMidi               As String
+Public DirIndex              As String
 Public DirDats               As String
-Public DirMinimapas          As String
-Public DirAudio              As String
-
+Public dirwavs               As String
+Public DirMp3               As String
+Public DirMinimapa               As String
 Public bAutoGuardarMapa      As Byte
 Public bAutoGuardarMapaCount As Byte
 Public HotKeysAllow          As Boolean  ' Control Automatico de HotKeys
@@ -152,19 +111,18 @@ End Type
 
 Public ClientSetup   As tSetupMods
 
-Public SobreX        As Integer ' Posicion X bajo el Cursor
-Public SobreY        As Integer   ' Posicion Y bajo el Cursor
+Public SobreX        As Byte   ' Posicion X bajo el Cursor
+Public SobreY        As Byte   ' Posicion Y bajo el Cursor
 
 ' Radar
 Public MiRadarX      As Integer
 Public MiRadarY      As Integer
-
 Public bRefreshRadar As Boolean
 
 Type SupData
 
-    name As String
-    Grh As Long
+    Name As String
+    Grh As Integer
     Width As Byte
     Height As Byte
     Block As Boolean
@@ -178,7 +136,7 @@ Public SupData() As SupData
 
 Public Type NpcData
 
-    name As String
+    Name As String
     Body As Integer
     Head As Integer
     Heading As Byte
@@ -192,9 +150,9 @@ Public NpcData() As NpcData
 
 Public Type ObjData
 
-    name As String 'Nombre del obj
+    Name As String 'Nombre del obj
     ObjType As Integer 'Tipo enum que determina cuales son las caract del obj
-    GrhIndex As Long ' Indice del grafico que representa el obj
+    GrhIndex As Integer ' Indice del grafico que representa el obj
     GrhSecundario As Integer
     Info As String
     Ropaje As Integer 'Indice del grafico del ropaje
@@ -205,11 +163,11 @@ Public Type ObjData
 End Type
 
 Public NumOBJs     As Integer
-
 Public ObjData()   As ObjData
 Public Conexion    As New Connection
 Public prgRun      As Boolean
 Public CurrentGrh  As Grh
+Public Play        As Boolean
 Public MapaCargado As Boolean
 Public cFPS        As Long
 Public dTiempoGT   As Double
@@ -218,9 +176,8 @@ Public dLastWalk   As Double
 'Hold info about each map
 Public Type MapInfo
 
-    midi As String
-    mp3 As String
-    name As String
+    Music As String
+    Name As String
     MapVersion As Integer
     PK As Boolean
     MagiaSinEfecto As Byte
@@ -232,9 +189,6 @@ Public Type MapInfo
     Restringir As String
     BackUp As Byte
     Changed As Byte ' flag for WorldEditor
-    SePuedeDomar As Byte
-    lvlMinimo As Byte
-    ambient As String
 
 End Type
 
@@ -246,10 +200,10 @@ Public Const SOUTH       As Byte = 3
 Public Const WEST        As Byte = 4
 
 'Map sizes in tiles
-Public Const XMaxMapSize As Integer = 100
-Public Const XMinMapSize As Integer = 1
-Public Const YMaxMapSize As Integer = 100
-Public Const YMinMapSize As Integer = 1
+Public Const XMaxMapSize As Byte = 100
+Public Const XMinMapSize As Byte = 1
+Public Const YMaxMapSize As Byte = 100
+Public Const YMinMapSize As Byte = 1
 
 '********** TYPES ***********
 'Holds a local position
@@ -269,48 +223,10 @@ Public Type WorldPos
 
 End Type
 
-'Points to a grhData and keeps animation info
-Public Type Grh
-
-    GrhIndex As Long
-    GrhIndexIntg As Integer
-    FrameCounter As Single
-    Speed As Single
-    Started As Byte
-    angle As Single
-    Loops As Integer
-
-End Type
-
-'Holds data about where a bmp can be found,
-'How big it is and animation info
-Public Type GrhData
-
-    sX As Integer
-    sY As Integer
-    
-    FileNum As Long
-    
-    PixelWidth As Integer
-    PixelHeight As Integer
-    
-    TileWidth As Single
-    TileHeight As Single
-    
-    NumFrames As Integer
-    Frames() As Long
-    
-    Speed As Single
-    
-    Active As Boolean
-    MiniMap_color As Long
-
-End Type
-
 ' Cuerpos body.dat
 Public Type tIndiceCuerpo
 
-    Body(1 To 4) As Long
+    Body(1 To 4) As Integer
     HeadOffsetX As Integer
     HeadOffsetY As Integer
 
@@ -326,21 +242,16 @@ End Type
 
 ' body.dat
 Public BodyData() As tBodyData
-
 Public NumBodies  As Integer
 
 'Lista de cabezas
 Public Type tIndiceCabeza
-
-    Head(1 To 4) As Long
-
+    Head(1 To 4) As Integer
 End Type
 
 'Heads list
 Public Type tHeadData
-
     Head(0 To 4) As Grh
-
 End Type
 
 Public HeadData() As tHeadData
@@ -358,22 +269,33 @@ Public Type Char
     Moving As Byte
     MoveOffset As Position
     
-    scrollDirectionX As Integer
-    scrollDirectionY As Integer
-
 End Type
 
 'Holds info about a object
 Public Type Obj
-
     objindex As Integer
     Amount As Integer
+End Type
+
+Public Light_Count As Integer
+
+Public Type Light
+
+    X As Integer
+    Y As Integer
+    Active As Boolean 'Do we ignore this light?
+    id As Long
+    map_x As Long 'Coordinates
+    map_y As Long
+    Color As Long 'Start colour
+    Range As Long
+    RGBCOLOR As D3DCOLORVALUE
 
 End Type
 
 'Holds info about each tile position
 Public Type MapBlock
-    
+
     Graphic(1 To 4) As Grh
     CharIndex As Integer
     ObjGrh As Grh
@@ -383,68 +305,25 @@ Public Type MapBlock
     NPCIndex As Integer
     OBJInfo As Obj
     TileExit As WorldPos
-    blocked As Byte
+    Blocked As Byte
     
-    light_value(3) As Long
-    particle_group_index As Long
-    particle_Index As Integer
+    light_index As Integer
+    base_light(0 To 3) As Boolean 'Indica si el tile tiene luz propia.
+    light_base_value(0 To 3) As Long 'Luz propia del tile.
+    light_value(0 To 3) As Long 'Color de luz con el que esta siendo renderizado.
+    
+    particle_group_index As Integer
+    parti_index As Integer
+    AlturaPoligonos(0 To 3) As Byte
 
 End Type
-
-'********** DirectX8 *************
-Public Type D3D8Textures
-
-    Texture As Direct3DTexture8
-    texwidth As Long
-    texheight As Long
-
-End Type
-
-Public dX        As DirectX8
-Public D3D       As Direct3D8
-Public D3DDevice As Direct3DDevice8
-Public D3DX      As D3DX8
-
-Public Type TLVERTEX
-
-    X As Single
-    Y As Single
-    Z As Single
-    rhw As Single
-    color As Long
-    Specular As Long
-    tu As Single
-    tv As Single
-
-End Type
-
-Public Type TLVERTEX2
-
-    X As Single
-    Y As Single
-    Z As Single
-    rhw As Single
-    color As Long
-    Specular As Long
-    tu1 As Single
-    tv1 As Single
-    tu2 As Single
-    tv2 As Single
-
-End Type
-
-Public SurfaceDB                                                                                  As clsTexManager 'DX8
-Public Texto                                                                                      As New clsDX8Font 'Textos renderizados
-'*******************************
-
-Public Audio                                                                                      As New clsAudio
 
 '********** Public VARS ***********
 'Where the map borders are.. Set during load
-Public MinXBorder                                                                                 As Integer
-Public MaxXBorder                                                                                 As Integer
-Public MinYBorder                                                                                 As Integer
-Public MaxYBorder                                                                                 As Integer
+Public MinXBorder                                                                                 As Byte
+Public MaxXBorder                                                                                 As Byte
+Public MinYBorder                                                                                 As Byte
+Public MaxYBorder                                                                                 As Byte
 
 'Object Constants
 Public Const MAX_INVENORY_OBJS                                                                    As Integer = 10000
@@ -452,21 +331,17 @@ Public Const MAX_INVENORY_OBJS                                                  
 ' Deshacer
 Public Const maxDeshacer                                                                          As Integer = 10
 Public MapData_Deshacer(1 To maxDeshacer, XMinMapSize To XMaxMapSize, YMinMapSize To YMaxMapSize) As MapBlock
-
 Type tDeshacerInfo
-
     Libre As Boolean
-    desc As String
-
+    Desc As String
 End Type
-
 Public MapData_Deshacer_Info(1 To maxDeshacer) As tDeshacerInfo
 
 '********** Public ARRAYS ***********
-Public GrhData()                               As GrhData 'Holds all the grh data
 Public MapData()                               As MapBlock 'Holds map data for current map
 Public MapInfo                                 As MapInfo 'Holds map info for current map
 Public CharList(1 To 10000)                    As Char 'Holds info about all characters on map
+Public Lights()                                As Light
 
 'Encabezado bmp
 Type BITMAPFILEHEADER
@@ -507,7 +382,6 @@ Global UserHead            As Integer
 Public UserPos             As Position 'Holds current user pos
 Public AddtoUserPos        As Position 'For moving user
 Public UserCharIndex       As Integer
-
 Public EngineRun           As Boolean
 Public FramesPerSec        As Integer
 Public FramesPerSecCounter As Long
@@ -542,58 +416,28 @@ Public MaxGrhs             As Integer 'Number of Grhs
 Global NumChars            As Integer
 Global LastChar            As Integer
 
+'********** Direct X ***********
+Public MainViewWidth       As Integer
+Public MainViewHeight      As Integer
+
 '********** OUTSIDE FUNCTIONS ***********
+
+Public Const PATH_GRAPHICS As String = "Graficos"
+Public Const PATH_INIT     As String = "Init"
+
 'Good old BitBlt
-Public Declare Function BitBlt _
-               Lib "gdi32" (ByVal hDestDC As Long, _
-                            ByVal X As Long, _
-                            ByVal Y As Long, _
-                            ByVal nWidth As Long, _
-                            ByVal nHeight As Long, _
-                            ByVal hSrcDC As Long, _
-                            ByVal xSrc As Long, _
-                            ByVal ySrc As Long, _
-                            ByVal dwRop As Long) As Long
+Public Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Public Declare Function SetPixel Lib "gdi32" (ByVal hdc As Long, ByVal X As Long, ByVal Y As Long, ByVal crColor As Long) As Long
 
 'Sound stuff
-Public Declare Function mciSendString _
-               Lib "winmm.dll" _
-               Alias "mciSendStringA" (ByVal lpstrCommand As String, _
-                                       ByVal lpstrReturnString As String, _
-                                       ByVal uRetrunLength As Long, _
-                                       ByVal hwndCallback As Long) As Long
-
-Public Declare Function sndPlaySound _
-               Lib "winmm.dll" _
-               Alias "sndPlaySoundA" (ByVal lpszSoundName As String, _
-                                      ByVal uFlags As Long) As Long
+Public Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As String, ByVal uRetrunLength As Long, ByVal hwndCallback As Long) As Long
+Public Declare Function sndPlaySound Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 
 'For Get and Write Var
-Public Declare Function writeprivateprofilestring _
-               Lib "kernel32" _
-               Alias "WritePrivateProfileStringA" (ByVal lpApplicationname As String, _
-                                                   ByVal lpKeyname As Any, _
-                                                   ByVal lpString As String, _
-                                                   ByVal lpfilename As String) As Long
-
-Public Declare Function GetPrivateProfileString _
-               Lib "kernel32" _
-               Alias "GetPrivateProfileStringA" (ByVal lpApplicationname As String, _
-                                                 ByVal lpKeyname As Any, _
-                                                 ByVal lpdefault As String, _
-                                                 ByVal lpreturnedstring As String, _
-                                                 ByVal nSize As Long, _
-                                                 ByVal lpfilename As String) As Long
+Public Declare Function writeprivateprofilestring Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationname As String, ByVal lpKeyname As Any, ByVal lpString As String, ByVal lpfilename As String) As Long
+Public Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationname As String, ByVal lpKeyname As Any, ByVal lpdefault As String, ByVal lpreturnedstring As String, ByVal nSize As Long, ByVal lpfilename As String) As Long
 
 'For KeyInput
 Public Declare Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
-
+Public Declare Function GetAsyncKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
 Public Declare Function GetTickCount Lib "kernel32" () As Long
-
-'SetPixel utilizada por minimapa
-Public Declare Function SetPixel _
-               Lib "gdi32" (ByVal hdc As Long, _
-                            ByVal X As Long, _
-                            ByVal Y As Long, _
-                            ByVal crColor As Long) As Long
-

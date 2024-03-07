@@ -1,168 +1,210 @@
 Attribute VB_Name = "modGeneral"
+'**************************************************************
+'This program is free software; you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation; either version 2 of the License, or
+'any later version.
+'
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
+'
+'You should have received a copy of the GNU General Public License
+'along with this program; if not, write to the Free Software
+'Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+'
+'Argentum Online is based on Baronsoft's VB6 Online RPG
+'You can contact the original creator of ORE at aaron@baronsoft.com
+'for more information about ORE please visit http://www.baronsoft.com/
+'**************************************************************
+
+''
+' modGeneral
+'
+' @remarks Funciones Generales
+' @author unkwown
+' @version 0.4.11
+' @date 20061015
+
 Option Explicit
 
+Public timer_elapsed_time As Single
+
+Public Type typDevMODE
+
+    dmDeviceName       As String * 32
+    dmSpecVersion      As Integer
+    dmDriverVersion    As Integer
+    dmSize             As Integer
+    dmDriverExtra      As Integer
+    dmFields           As Long
+    dmOrientation      As Integer
+    dmPaperSize        As Integer
+    dmPaperLength      As Integer
+    dmPaperWidth       As Integer
+    dmScale            As Integer
+    dmCopies           As Integer
+    dmDefaultSource    As Integer
+    dmPrintQuality     As Integer
+    dmColor            As Integer
+    dmDuplex           As Integer
+    dmYResolution      As Integer
+    dmTTOption         As Integer
+    dmCollate          As Integer
+    dmFormName         As String * 32
+    dmUnusedPadding    As Integer
+    dmBitsPerPel       As Integer
+    dmPelsWidth        As Long
+    dmPelsHeight       As Long
+    dmDisplayFlags     As Long
+    dmDisplayFrequency As Long
+
+End Type
+
+Public Declare Function EnumDisplaySettings Lib "user32" Alias "EnumDisplaySettingsA" (ByVal lpszDeviceName As Long, ByVal iModeNum As Long, lptypDevMode As Any) As Boolean
+
+Public Declare Function ChangeDisplaySettings Lib "user32" Alias "ChangeDisplaySettingsA" (lptypDevMode As Any, ByVal dwFlags As Long) As Long
+
+Private Declare Function QueryPerformanceFrequency Lib "kernel32" (lpFrequency As Currency) As Long
+
+Private Declare Function QueryPerformanceCounter Lib "kernel32" (lpPerformanceCount As Currency) As Long
+
 Public Const CCDEVICENAME = 32
+
 Public Const CCFORMNAME = 32
+
 Public Const DM_BITSPERPEL = &H40000
+
 Public Const DM_PELSWIDTH = &H80000
+
 Public Const DM_DISPLAYFREQUENCY = &H400000
+
 Public Const DM_PELSHEIGHT = &H100000
+
 Public Const CDS_UPDATEREGISTRY = &H1
+
 Public Const CDS_TEST = &H4
+
 Public Const DISP_CHANGE_SUCCESSFUL = 0
+
 Public Const DISP_CHANGE_RESTART = 1
 
-Public InitPath As String
-Public GraphicsPath As String
-Public ClientPath As String
-Public ServerPath As String
-
-
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+
+Private Declare Function GetActiveWindow Lib "user32" () As Long
+
+''
+' Checks if this is the active (foreground) application or not.
+'
+' @return   True if any of the app's windows are the foreground window, false otherwise.
+
+Public Function IsAppActive() As Boolean
+    '***************************************************
+    'Author: Juan Martin Sotuyo Dodero (maraxus)
+    'Last Modify Date: 03/03/2007
+    'Checks if this is the active application or not
+    '***************************************************
+    IsAppActive = (GetActiveWindow <> 0)
+
+End Function
 
 ''
 ' Realiza acciones de desplasamiento segun las teclas que hallamos precionado
 '
 
 Public Sub CheckKeys()
+
     '*************************************************
     'Author: ^[GS]^
-    'Last modified: 01/11/08
+    'Last modified: 28/05/06
     '*************************************************
-
     If HotKeysAllow = False Then Exit Sub
-    '[Loopzer]
-    'If GetKeyState(vbKeyControl) < 0 Then
-    '    If Seleccionando Then
-    '        If GetKeyState(vbKeyC) < 0 Then CopiarSeleccion
-    '        If GetKeyState(vbKeyX) < 0 Then CortarSeleccion
-    '        If GetKeyState(vbKeyB) < 0 Then BlockearSeleccion
-    '        If GetKeyState(vbKeyD) < 0 Then AccionSeleccion
-    ''    Else
-    '        If GetKeyState(vbKeyS) < 0 Then DePegar ' GS
-    '        If GetKeyState(vbKeyV) < 0 Then PegarSeleccion
-    '    End If
-    'End If
-    '[/Loopzer]
+    
+    Static timer As Long
+
+    If GetTickCount - timer > 30 Then
+        timer = GetTickCount
+    Else
+        Exit Sub
+
+    End If
     
     If GetKeyState(vbKeyUp) < 0 Then
-        
         If UserPos.Y < 1 Then Exit Sub ' 10
-        
         If LegalPos(UserPos.X, UserPos.Y - 1) And WalkMode = True Then
-            
             If dLastWalk + 50 > GetTickCount Then Exit Sub
-            
             UserPos.Y = UserPos.Y - 1
-            
-            Call MoveCharbyPos(UserCharIndex, UserPos.X, UserPos.Y)
-            
+            MoveCharbyPos UserCharIndex, UserPos.X, UserPos.Y
             dLastWalk = GetTickCount
-        
         ElseIf WalkMode = False Then
-            
             UserPos.Y = UserPos.Y - 1
-        
-        End If
-        
-        bRefreshRadar = True ' Radar
-        
-        Call ActualizaMinimap
 
+        End If
+
+        bRefreshRadar = True ' Radar
         frmMain.SetFocus
-        
         Exit Sub
+
     End If
 
     If GetKeyState(vbKeyRight) < 0 Then
-        
         If UserPos.X > 100 Then Exit Sub ' 89
-        
         If LegalPos(UserPos.X + 1, UserPos.Y) And WalkMode = True Then
-            
             If dLastWalk + 50 > GetTickCount Then Exit Sub
-            
             UserPos.X = UserPos.X + 1
-            
-            Call MoveCharbyPos(UserCharIndex, UserPos.X, UserPos.Y)
-            
+            MoveCharbyPos UserCharIndex, UserPos.X, UserPos.Y
             dLastWalk = GetTickCount
-        
         ElseIf WalkMode = False Then
             UserPos.X = UserPos.X + 1
-        
+
         End If
-        
+
         bRefreshRadar = True ' Radar
-        
-        Call ActualizaMinimap
-        
         frmMain.SetFocus
-        
         Exit Sub
-        
+
     End If
 
     If GetKeyState(vbKeyDown) < 0 Then
-        
         If UserPos.Y > 100 Then Exit Sub ' 92
-        
         If LegalPos(UserPos.X, UserPos.Y + 1) And WalkMode = True Then
-            
             If dLastWalk + 50 > GetTickCount Then Exit Sub
-            
             UserPos.Y = UserPos.Y + 1
-            
-            Call MoveCharbyPos(UserCharIndex, UserPos.X, UserPos.Y)
-            
+            MoveCharbyPos UserCharIndex, UserPos.X, UserPos.Y
             dLastWalk = GetTickCount
-            
         ElseIf WalkMode = False Then
             UserPos.Y = UserPos.Y + 1
-        
-        End If
-        
-        bRefreshRadar = True ' Radar
-        
-        Call ActualizaMinimap
 
+        End If
+
+        bRefreshRadar = True ' Radar
         frmMain.SetFocus
-        
         Exit Sub
-        
+
     End If
 
     If GetKeyState(vbKeyLeft) < 0 Then
-        
         If UserPos.X < 1 Then Exit Sub ' 12
-        
         If LegalPos(UserPos.X - 1, UserPos.Y) And WalkMode = True Then
-            
             If dLastWalk + 50 > GetTickCount Then Exit Sub
-            
             UserPos.X = UserPos.X - 1
-            
-            Call MoveCharbyPos(UserCharIndex, UserPos.X, UserPos.Y)
-            
+            MoveCharbyPos UserCharIndex, UserPos.X, UserPos.Y
             dLastWalk = GetTickCount
-        
         ElseIf WalkMode = False Then
             UserPos.X = UserPos.X - 1
+
         End If
-        
+
         bRefreshRadar = True ' Radar
-        
-        Call ActualizaMinimap
- 
         frmMain.SetFocus
-        
         Exit Sub
-        
+
     End If
-    
+
 End Sub
 
-Public Function ReadField(Pos As Integer, Text As String, SepASCII As Integer) As String
+Public Function general_field_read(ByVal Pos As Integer, Text As String, SepASCII As Integer) As String
 
     '*************************************************
     'Author: Unkwown
@@ -183,13 +225,13 @@ Public Function ReadField(Pos As Integer, Text As String, SepASCII As Integer) A
     FieldNum = 0
 
     For i = 1 To Len(Text)
-        CurChar = mid$(Text, i, 1)
+        CurChar = mid(Text, i, 1)
 
         If CurChar = Seperator Then
             FieldNum = FieldNum + 1
 
             If FieldNum = Pos Then
-                ReadField = mid$(Text, LastPos + 1, (InStr(LastPos + 1, Text, Seperator, vbTextCompare) - 1) - (LastPos))
+                general_field_read = mid(Text, LastPos + 1, (InStr(LastPos + 1, Text, Seperator, vbTextCompare) - 1) - (LastPos))
                 Exit Function
 
             End If
@@ -203,7 +245,7 @@ Public Function ReadField(Pos As Integer, Text As String, SepASCII As Integer) A
     FieldNum = FieldNum + 1
 
     If FieldNum = Pos Then
-        ReadField = mid$(Text, LastPos + 1)
+        general_field_read = mid(Text, LastPos + 1)
 
     End If
 
@@ -222,13 +264,13 @@ Private Function autoCompletaPath(ByVal Path As String) As String
     '*************************************************
     Path = Replace(Path, "/", "\")
 
-    If Left$(Path, 1) = "\" Then
+    If left(Path, 1) = "\" Then
         ' agrego app.path & path
         Path = App.Path & Path
 
     End If
 
-    If Right$(Path, 1) <> "\" Then
+    If Right(Path, 1) <> "\" Then
         ' me aseguro que el final sea con "\"
         Path = Path & "\"
 
@@ -254,46 +296,157 @@ Private Sub CargarMapIni()
 
     Dim Leer As New clsIniManager
 
-    If FileExist(App.Path & "\WorldEditor.ini", vbArchive) = False Then
+    inipath = App.Path & "\"
+
+    If FileExist(inipath & "WorldEditor.ini", vbArchive) = False Then
         frmMain.mnuGuardarUltimaConfig.Checked = True
-        MaxGrhs = 32000
+        DirGraficos = inipath & PATH_GRAPHICS & "\"
+        DirIndex = inipath & PATH_INIT & "\"
+        DirMidi = inipath & "MIDI\"
+        frmMusica.fleMusicas.Path = DirMidi
+        DirDats = inipath & "DATS\"
+        dirwavs = inipath & "WAV\"
+        DirMp3 = inipath & "MP3\"
+        DirMinimapa = inipath & "Minimapa\"
+        'frmMusica.fleMusicas.Path = DirMp3 HACER QUE FUNCIONEN LOS MP3S
+        MaxGrhs = 15000
         UserPos.X = 50
         UserPos.Y = 50
         PantallaX = 19
         PantallaY = 22
-        MsgBox "Falta el archivo 'WorldEditor.ini' de configuración.", vbInformation
+        MsgBox "Falta el archivo 'WorldEditor.ini' de configuracion.", vbInformation
         Exit Sub
 
     End If
-    
-    Call Leer.Initialize(App.Path & "\WorldEditor.ini")
-    
+
+    Call Leer.Initialize(inipath & "WorldEditor.ini")
+
     ' Obj de Translado
     Cfg_TrOBJ = Val(Leer.GetValue("CONFIGURACION", "ObjTranslado"))
     frmMain.mnuAutoCapturarTranslados.Checked = Val(Leer.GetValue("CONFIGURACION", "AutoCapturarTrans"))
     frmMain.mnuAutoCapturarSuperficie.Checked = Val(Leer.GetValue("CONFIGURACION", "AutoCapturarSup"))
     frmMain.mnuUtilizarDeshacer.Checked = Val(Leer.GetValue("CONFIGURACION", "UtilizarDeshacer"))
-    
+
     ' Guardar Ultima Configuracion
     frmMain.mnuGuardarUltimaConfig.Checked = Val(Leer.GetValue("CONFIGURACION", "GuardarConfig"))
 
     ' Index
-    MaxGrhs = Val(Leer.GetValue("INDEX", "MaxGrhs"))
+    MaxGrhs = Val(general_var_get(inipath & "WorldEditor.ini", "INDEX", "MaxGrhs"))
 
-    If MaxGrhs < 1 Then MaxGrhs = 32000
-    
+    If MaxGrhs < 1 Then MaxGrhs = 15000
+
+    'Reciente
+    frmMain.Dialog.InitDir = Leer.GetValue("PATH", "UltimoMapa")
+    DirGraficos = autoCompletaPath(Leer.GetValue("PATH", "DirGraficos"))
+
+    If DirGraficos = "\" Then
+        DirGraficos = inipath & PATH_GRAPHICS & "\"
+
+    End If
+
+    If FileExist(DirGraficos, vbDirectory) = False Then
+        MsgBox "El directorio de Graficos es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+
+    DirMidi = autoCompletaPath(Leer.GetValue("PATH", "DirMidi"))
+
+    If DirMidi = "\" Then
+        DirMidi = inipath & "\MIDI" & "\"
+
+    End If
+
+    If FileExist(DirMidi, vbDirectory) = False Then
+        MsgBox "El directorio de MIDI es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+    frmMusica.fleMusicas.Path = DirMidi
+
+    DirIndex = autoCompletaPath(Leer.GetValue("PATH", "DirIndex"))
+
+    If DirIndex = "\" Then
+        DirIndex = inipath & PATH_INIT & "\"
+
+    End If
+
+    If FileExist(DirIndex, vbDirectory) = False Then
+        MsgBox "El directorio de Index es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+
+    DirDats = autoCompletaPath(Leer.GetValue("PATH", "DirDats"))
+
+    If DirDats = "\" Then
+        DirDats = inipath & "DAT\"
+
+    End If
+
+    If FileExist(DirDats, vbDirectory) = False Then
+        MsgBox "El directorio de Dats es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+
+    dirwavs = autoCompletaPath(Leer.GetValue("PATH", "dirwavs"))
+
+    If dirwavs = "\" Then
+        dirwavs = inipath & "WAV\"
+
+    End If
+
+    If FileExist(dirwavs, vbDirectory) = False Then
+        MsgBox "El directorio de WAV es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+
+    DirMp3 = autoCompletaPath(Leer.GetValue("PATH", "DirMp3"))
+
+    If DirMp3 = "\" Then
+        DirMp3 = inipath & "MP3\"
+
+    End If
+
+    If FileExist(DirMp3, vbDirectory) = False Then
+        MsgBox "El directorio de MP3 es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+    'TODO HACER QUE SE PUEDAN PONER MP3S
+    'frmMusica.fleMusicas.Path = DirMp3
+
+
+    DirMinimapa = autoCompletaPath(Leer.GetValue("PATH", "DirMinimapa"))
+
+    If DirMinimapa = "\" Then
+        DirMinimapa = inipath & "Minimapa\"
+
+    End If
+
+    If FileExist(DirMinimapa, vbDirectory) = False Then
+        MsgBox "El directorio de MiniMapa es incorrecto", vbCritical + vbOKOnly
+        End
+
+    End If
+
+
     tStr = Leer.GetValue("MOSTRAR", "LastPos") ' x-y
-    UserPos.X = Val(ReadField(1, tStr, Asc("-")))
-    UserPos.Y = Val(ReadField(2, tStr, Asc("-")))
+    UserPos.X = Val(general_field_read(1, tStr, Asc("-")))
+    UserPos.Y = Val(general_field_read(2, tStr, Asc("-")))
 
     If UserPos.X < XMinMapSize Or UserPos.X > XMaxMapSize Then
         UserPos.X = 50
+
     End If
 
     If UserPos.Y < YMinMapSize Or UserPos.Y > YMaxMapSize Then
         UserPos.Y = 50
+
     End If
-    
+
     ' Menu Mostrar
     frmMain.mnuVerAutomatico.Checked = Val(Leer.GetValue("MOSTRAR", "ControlAutomatico"))
     frmMain.mnuVerCapa2.Checked = Val(Leer.GetValue("MOSTRAR", "Capa2"))
@@ -306,55 +459,24 @@ Private Sub CargarMapIni()
     frmMain.mnuVerGrilla.Checked = Val(Leer.GetValue("MOSTRAR", "Grilla")) ' Grilla
     VerGrilla = frmMain.mnuVerGrilla.Checked
     frmMain.mnuVerBloqueos.Checked = Val(Leer.GetValue("MOSTRAR", "Bloqueos"))
-    frmMain.cVerTriggers.value = frmMain.mnuVerTriggers.Checked
-    frmMain.cVerBloqueos.value = frmMain.mnuVerBloqueos.Checked
-    
-    ' Tamaño de visualizacion
+    frmMain.cVerTriggers.Value = frmMain.mnuVerTriggers.Checked
+    frmMain.cVerBloqueos.Value = frmMain.mnuVerBloqueos.Checked
+
+    ' Tamano de visualizacion
     PantallaX = Val(Leer.GetValue("MOSTRAR", "PantallaX"))
     PantallaY = Val(Leer.GetValue("MOSTRAR", "PantallaY"))
 
     If PantallaX > 23 Or PantallaX <= 2 Then PantallaX = 23
     If PantallaY > 32 Or PantallaY <= 2 Then PantallaY = 32
-    
-    ' [GS] 02/10/06
-    ' Tamaño de visualizacion en el cliente
-    ClienteHeight = Val(Leer.GetValue("RENDER", "ClienteHeight"))
-    ClienteWidth = Val(Leer.GetValue("RENDER", "ClienteWidth"))
-    
-    ' Paths GS 2021
-    InitPath = App.Path & "\" & Leer.GetValue("PATH", "Init")
-    DirDats = App.Path & "\" & Leer.GetValue("PATH", "Dats")
-    DirMinimapas = App.Path & "\" & Leer.GetValue("PATH", "Minimapas")
-    DirAudio = App.Path & "\" & Leer.GetValue("PATH", "Audio")
-    GraphicsPath = App.Path & "\" & Leer.GetValue("PATH", "Graficos")
-    
-    If Len(InitPath) = 0 Then
-        InitPath = App.Path & "\Recursos\Init\"
-    End If
-    If Len(DirDats) = 0 Then
-        DirDats = App.Path & "\Dats\"
-    End If
-    If Len(DirMinimapas) = 0 Then
-        DirMinimapas = App.Path & "\Recursos\Graficos\Minimapa\"
-    End If
-    If Len(DirAudio) = 0 Then
-        DirAudio = App.Path & "\Recursos\Audio\"
-    End If
-    If Len(GraphicsPath) = 0 Then
-        GraphicsPath = App.Path & "\Recursos\Graficos\"
-    End If
 
-    If frmMain.Option2.value = True Then
-        ClienteHeight = 13
-        ClienteWidth = 17
-        Else
-        ClienteHeight = 19
-        ClienteWidth = 21
-    End If
-    
+    ' [GS] 02/10/06
+    ' Tamano de visualizacion en el cliente
+    ClienteHeight = Val(Leer.GetValue("MOSTRAR", "ClienteHeight"))
+    ClienteWidth = Val(Leer.GetValue("MOSTRAR", "ClienteWidth"))
+
     If ClienteHeight <= 0 Then ClienteHeight = 13
     If ClienteWidth <= 0 Then ClienteWidth = 17
-    
+
     Exit Sub
 Fallo:
     MsgBox "ERROR " & Err.Number & " en WorldEditor.ini" & vbCrLf & Err.Description, vbCritical
@@ -362,124 +484,300 @@ Fallo:
     Resume Next
 
 End Sub
-    
+
+Public Function TomarBPP() As Integer
+
+    Dim ModoDeVideo As typDevMODE
+
+    Call EnumDisplaySettings(0, -1, ModoDeVideo)
+    TomarBPP = CInt(ModoDeVideo.dmBitsPerPel)
+
+End Function
+
+Public Sub CambioDeVideo()
+    '*************************************************
+    'Author: Loopzer
+    '*************************************************
+    Exit Sub
+
+    Dim ModoDeVideo As typDevMODE
+
+    Dim R           As Long
+
+    Call EnumDisplaySettings(0, -1, ModoDeVideo)
+
+    If ModoDeVideo.dmPelsWidth < 1024 Or ModoDeVideo.dmPelsHeight < 768 Then
+
+        Select Case MsgBox("La aplicacion necesita una resolucion minima de 1024 X 768 ,Acepta el Cambio de resolucion?", vbInformation + vbOKCancel, "World Editor")
+
+            Case vbOK
+                ModoDeVideo.dmPelsWidth = 1024
+                ModoDeVideo.dmPelsHeight = 768
+                ModoDeVideo.dmFields = DM_PELSWIDTH Or DM_PELSHEIGHT
+                R = ChangeDisplaySettings(ModoDeVideo, CDS_TEST)
+
+                If R <> 0 Then
+                    MsgBox "Error al cambiar la resolucion, La aplicacion se cerrara."
+                    End
+
+                End If
+
+            Case vbCancel
+                End
+
+        End Select
+
+    End If
+
+End Sub
+
 Public Sub Main()
 
     '*************************************************
     'Author: Unkwown
     'Last modified: 25/11/08 - GS
     '*************************************************
-    On Error Resume Next
-
-    If App.PrevInstance = True Then End
-
+    'On Error Resume Next
     Dim OffsetCounterX As Integer
+
     Dim OffsetCounterY As Integer
+
     Dim Chkflag        As Integer
+    
+    If App.PrevInstance = True Then End
+    'CambioDeVideo
 
+    'If FileExist(DirIndex & "AO.dat", vbArchive) Then
+    Call LoadClientSetup
+    'End If
+    Set DXPool = New clsTextureManager
+    
     Call CargarMapIni
-    
-    With frmCargando
-
-        If FileExist(IniPath & "WorldEditor.jpg", vbArchive) Then
-            .Picture1.Picture = LoadPicture(IniPath & "WorldEditor.jpg")
-        End If
-    
-        .verX = "v" & App.Major & "." & App.Minor & "." & App.Revision
-        
-        Call .Show
-        Call .SetFocus
-        DoEvents
-                
-        .X.Caption = "Inicializando constantes..."
-            IniPath = App.Path & "\"
-            'InitPath = App.Path & "\Recursos\Init\"
-            'DirDats = App.Path & "\Dats\"
-            'DirMinimapas = App.Path & "\Recursos\Graficos\MiniMapa\"
-            'DirAudio = App.Path & "\Recursos\Audio\"
-            ClientPath = "..\Cliente\Init\"
-            ServerPath = "..\Server\Dat\"
-            'GraphicsPath = "..\Cliente\Graficos\"
-        DoEvents
-        
-        .X.Caption = "Cargando Indice de Superficies..."
-            Call modIndices.CargarIndicesSuperficie
-        DoEvents
-
-        .X.Caption = "Comprobando recursos..."
-        DoEvents
-        Call CheckResources
-
-        .X.Caption = "Indexando Cargado de Imagenes..."
-        DoEvents
-
-        If Not Engine_Init Then ' 30/05/2006
-            Call MsgBox("¡No se ha logrado iniciar el engine gráfico! Reinstale los últimos controladores de DirectX y actualize sus controladores de video.", vbCritical, "Saliendo")
-            End
-        End If
-
-        .X.Caption = "Iniciando motor de audio"
-        DoEvents
-        
-        Call Audio.Initialize(dX, frmMain.hwnd, "", DirAudio & "MIDI\", DirAudio & "MP3\")
-        
-    
-        With MapSize
-            .XMax = XMaxMapSize
-            .XMin = XMinMapSize
-            .YMax = YMaxMapSize
-            .YMin = YMinMapSize
-            ReDim MapData(.XMin To .XMax, .YMin To .YMax)
-        End With
-
-        Call .SetFocus
-
-        .X.Caption = "Iniciando Ventana de Edición..."
-        DoEvents
-        
-        Call .Hide
-    
-    End With
-    
-    'If frmRender.Visible Then RenderToPicture
-    frmMain.Show
+    Call IniciarCabecera(MiCabecera)
     DoEvents
     
-    Call modMapIO.NuevoMapa
+    If FileExist(inipath & "WorldEditor.jpg", vbArchive) Then frmCargando.Picture1.Picture = LoadPicture(inipath & "WorldEditor.jpg")
+    
+    frmCargando.verX = "v" & App.Major & "." & App.Minor & "." & App.Revision
+    frmCargando.Show
+    frmCargando.SetFocus
+    frmCargando.X.Caption = "Iniciando DirectSound..."
+    DoEvents
+
+    Call Audio.Initialize(frmMain.hWnd, dirwavs, DirMp3)
+    
+    Audio.MusicActivated = True
+    Audio.SoundActivated = True
+    
+    frmCargando.X.Caption = "Cargando Indice de Superficies..."
+    modIndices.CargarIndicesSuperficie
+    frmCargando.X.Caption = "Indexando Cargado de Imagenes..."
+    DoEvents
+        
+    'frmMain.MainViewPic.width = PantallaX ^ 3
+    'frmMain.MainViewPic.height = PantallaY ^ 3
+        
+    modDXEngine.DXEngine_Initialize frmMain.hWnd, frmMain.MainViewPic.hWnd, True
+    modGrh.Animations_Initialize 0.03, 32
+        
+    Meteo.Initialize
+    Meteo.Set_Time 15, 0
+        
+    If InitTileEngine(frmMain.hWnd, frmMain.MainViewPic.top + 50, frmMain.MainViewPic.left + 4, 32, 32, ClienteWidth, ClienteHeight, 9) Then ' 30/05/2006
+        'Display form handle, View window offset from 0,0 of display form, Tile Size, Display size in tiles, Screen buffer
+        frmCargando.P1.Visible = True
+        frmCargando.L(0).Visible = True
+        frmCargando.X.Caption = "Cargando Cuerpos..."
+        modIndices.CargarIndicesDeCuerpos
+        DoEvents
+        
+        frmCargando.P2.Visible = True
+        frmCargando.L(1).Visible = True
+        frmCargando.X.Caption = "Cargando Cabezas..."
+        modIndices.CargarIndicesDeCabezas
+        DoEvents
+        
+        frmCargando.P3.Visible = True
+        frmCargando.L(2).Visible = True
+        frmCargando.X.Caption = "Cargando NPC's..."
+        modIndices.CargarIndicesNPC
+        DoEvents
+        
+        frmCargando.P4.Visible = True
+        frmCargando.L(3).Visible = True
+        frmCargando.X.Caption = "Cargando Objetos..."
+        modIndices.CargarIndicesOBJ
+        DoEvents
+        
+        frmCargando.P5.Visible = True
+        frmCargando.L(4).Visible = True
+        frmCargando.X.Caption = "Cargando Triggers..."
+        modIndices.CargarIndicesTriggers
+        DoEvents
+        
+        frmCargando.P6.Visible = True
+        frmCargando.L(5).Visible = True
+
+    End If
+    
+    frmCargando.SetFocus
+    frmCargando.X.Caption = "Iniciando Ventana de Edicion..."
+    
+    frmCargando.Hide
+    frmMain.Show
+    modMapIO.NuevoMapa
     
     prgRun = True
-    Call Start
+    cFPS = 0
+    Chkflag = 0
+    dTiempoGT = GetTickCount
     
-    Call AddtoRichTextBox(frmMain.StatTxt, "World Editor By Lorwik iniciado...", 0, 255, 0)
+    Dim alturaAgua  As Integer
+
+    Dim ma1_bajando As Byte
+
+    alturaAgua = 6
+
+    Do While prgRun
+
+        If ma1_bajando = 0 Then
+            ma(0) = ma(0) + timer_ticks_per_frame / 2
+
+            If ma(0) >= alturaAgua Then
+                ma(0) = alturaAgua
+                ma1_bajando = 1
+
+            End If
+
+        Else
+            ma(0) = ma(0) - timer_ticks_per_frame / 2
+
+            If ma(0) <= -alturaAgua Then
+                ma(0) = -alturaAgua
+                ma1_bajando = 0
+
+            End If
+
+        End If
+    
+        ma(1) = ma(0)
+    
+        If ma1_bajando = 0 Then
+            ma(1) = ma(1) + (alturaAgua / 2)
+
+            If ma(1) >= alturaAgua Then ma(1) = alturaAgua - (ma(1) - alturaAgua)
+        Else
+            ma(1) = ma(1) - (alturaAgua / 2)
+
+            If ma(1) <= -alturaAgua Then ma(1) = -alturaAgua + Abs(ma(1) + alturaAgua)
+
+        End If
+    
+        ma(1) = -ma(1)
+    
+        If AddtoUserPos.X <> 0 Then
+            OffsetCounterX = (OffsetCounterX - (8 * Sgn(AddtoUserPos.X)))
+
+            If Abs(OffsetCounterX) >= Abs(TilePixelWidth * AddtoUserPos.X) Then
+                OffsetCounterX = 0
+                AddtoUserPos.X = 0
+
+            End If
+
+        ElseIf AddtoUserPos.Y <> 0 Then
+            OffsetCounterY = OffsetCounterY - (8 * Sgn(AddtoUserPos.Y))
+
+            If Abs(OffsetCounterY) >= Abs(TilePixelHeight * AddtoUserPos.Y) Then
+                OffsetCounterY = 0
+                AddtoUserPos.Y = 0
+
+            End If
+
+        End If
+        
+        If (GetTickCount - dTiempoGT) >= 1000 Then
+            CaptionWorldEditor frmMain.Dialog.FileName, (MapInfo.Changed = 1)
+            frmMain.FPS.Caption = "FPS: " & cFPS
+            cFPS = 1
+            dTiempoGT = GetTickCount
+        Else
+            cFPS = cFPS + 1
+
+        End If
+            
+        If Chkflag = 3 Then
+            If frmMain.WindowState <> 1 Then Call CheckKeys
+            
+            Chkflag = 0
+
+            DXEngine_BeginRender
+            Call RenderScreen(UserPos.X - AddtoUserPos.X, UserPos.Y - AddtoUserPos.Y, OffsetCounterX, OffsetCounterY)
+            
+            DXEngine_EndRender
+            
+            timer_elapsed_time = GetElapsedTime()
+            modGrh.AnimSpeedCalculate timer_elapsed_time
+
+        End If
+        
+        Chkflag = Chkflag + 1
+        
+        If CurrentGrh.GrhIndex = 0 Then
+            Grh_Initialize CurrentGrh, 1
+
+        End If
+        
+        If bRefreshRadar Then Call RefreshAllChars
+        
+        DoEvents
+        'Sleep 1
+    Loop
+    
+    If MapInfo.Changed = 1 Then
+        If MsgBox(MSGMod, vbExclamation + vbYesNo) = vbYes Then
+            modMapIO.GuardarMapa frmMain.Dialog.FileName
+
+        End If
+
+    End If
+    
+    DXEngine_Deinitialize
+
+    Dim f
+    
+    For Each f In Forms
+
+        Unload f
+    Next
+    
+    End
 
 End Sub
 
-Public Function GetVar(File As String, Main As String, Var As String) As String
-
+Public Function general_var_get(File As String, ByVal Main As String, Var As String) As String
     '*************************************************
     'Author: Unkwown
     'Last modified: 20/05/06
     '*************************************************
-    Dim L        As Integer
-    Dim Char     As String
+
     Dim sSpaces  As String ' This will hold the input that the program will retrieve
+
     Dim szReturn As String ' This will be the defaul value if the string is not found
 
     szReturn = vbNullString
     sSpaces = Space(5000) ' This tells the computer how long the longest string can be. If you want, you can change the number 75 to any number you wish
-    Call GetPrivateProfileString(Main, Var, szReturn, sSpaces, Len(sSpaces), File)
-    GetVar = RTrim$(sSpaces)
-    GetVar = Left$(GetVar, Len(GetVar) - 1)
+    GetPrivateProfileString Main, Var, szReturn, sSpaces, Len(sSpaces), File
+    general_var_get = RTrim(sSpaces)
+    general_var_get = left(general_var_get, Len(general_var_get) - 1)
 
 End Function
 
-Public Sub WriteVar(File As String, Main As String, Var As String, value As String)
+Public Sub WriteVar(File As String, Main As String, Var As String, Value As String)
     '*************************************************
     'Author: Unkwown
     'Last modified: 20/05/06
     '*************************************************
-    
-    Call writeprivateprofilestring(Main, Var, value, File)
+    writeprivateprofilestring Main, Var, Value, File
 
 End Sub
 
@@ -522,7 +820,7 @@ fin:
 
 End Sub
 
-Public Sub FixCoasts(ByVal GrhIndex As Long, ByVal X As Integer, ByVal Y As Integer)
+Public Sub FixCoasts(ByVal GrhIndex As Integer, ByVal X As Integer, ByVal Y As Integer)
     '*************************************************
     'Author: Unkwown
     'Last modified: 20/05/06
@@ -532,16 +830,52 @@ Public Sub FixCoasts(ByVal GrhIndex As Long, ByVal X As Integer, ByVal Y As Inte
 
 End Sub
 
-Public Function RandomNumber(ByVal LowerBound As Variant, _
-                             ByVal UpperBound As Variant) As Single
+Public Function RandomNumber(ByVal LowerBound As Variant, ByVal UpperBound As Variant) As Single
     '*************************************************
     'Author: Unkwown
     'Last modified: 20/05/06
     '*************************************************
-    Call Randomize(Timer)
+    Randomize timer
     RandomNumber = (UpperBound - LowerBound) * Rnd + LowerBound
 
 End Function
+
+''
+' Actualiza todos los Chars en el mapa
+'
+
+Public Sub RefreshAllChars()
+
+    '*************************************************
+    'Author: ^[GS]^
+    'Last modified: 28/05/06
+    '*************************************************
+    On Error Resume Next
+
+    Dim loopc As Integer
+
+    frmMain.ApuntadorRadar.Move UserPos.X - 12, UserPos.Y - 10
+    frmMain.picRadar.Cls
+
+    For loopc = 1 To LastChar
+
+        If CharList(loopc).Active = 1 Then
+            MapData(CharList(loopc).Pos.X, CharList(loopc).Pos.Y).CharIndex = loopc
+
+            If CharList(loopc).Heading <> 0 Then
+                frmMain.picRadar.ForeColor = vbGreen
+                frmMain.picRadar.Line (0 + CharList(loopc).Pos.X, 0 + CharList(loopc).Pos.Y)-(2 + CharList(loopc).Pos.X, 0 + CharList(loopc).Pos.Y)
+                frmMain.picRadar.Line (0 + CharList(loopc).Pos.X, 1 + CharList(loopc).Pos.Y)-(2 + CharList(loopc).Pos.X, 1 + CharList(loopc).Pos.Y)
+
+            End If
+
+        End If
+
+    Next loopc
+
+    bRefreshRadar = False
+
+End Sub
 
 ''
 ' Actualiza el Caption del menu principal
@@ -569,142 +903,55 @@ Public Sub CaptionWorldEditor(ByVal Trabajando As String, ByVal Editado As Boole
 
 End Sub
 
-Sub AddtoRichTextBox(ByRef RichTextBox As RichTextBox, _
-                     ByVal Text As String, _
-                     Optional ByVal red As Integer = -1, _
-                     Optional ByVal green As Integer, _
-                     Optional ByVal blue As Integer, _
-                     Optional ByVal bold As Boolean = False, _
-                     Optional ByVal italic As Boolean = False, _
-                     Optional ByVal bCrLf As Boolean = True)
+Private Sub LoadClientSetup()
 
-    '******************************************
-    'Adds text to a Richtext box at the bottom.
-    'Automatically scrolls to new text.
-    'Text box MUST be multiline and have a 3D
-    'apperance!
-    'Pablo (ToxicWaste) 01/26/2007 : Now the list refeshes properly.
-    'Juan Martín Sotuyo Dodero (Maraxus) 03/29/2007 : Replaced ToxicWaste's code for extra performance.
-    '******************************************r
-    With RichTextBox
+    '**************************************************************
+    'Author: Juan Martin Sotuyo Dodero (Maraxus)
+    'Last Modify Date: 11/19/09
+    '11/19/09: Pato - Is optional show the frmGuildNews form
+    '**************************************************************
+    Dim fHandle As Integer
+    
+    If FileExist(DirIndex & "ao.dat", vbArchive) Then
+        fHandle = FreeFile
+        
+        Open DirIndex & "ao.dat" For Binary Access Read Lock Write As fHandle
+        Get fHandle, , ClientSetup
+        Close fHandle
+    Else
+        'Use dynamic by default
+        ClientSetup.bDinamic = True
 
-        If Len(.Text) > 1000 Then
-            'Get rid of first line
-            .SelStart = InStr(1, .Text, vbCrLf) + 1
-            .SelLength = Len(.Text) - .SelStart + 2
-            .TextRTF = .SelRTF
-
-        End If
-        
-        .SelStart = Len(.Text)
-        .SelLength = 0
-        .SelBold = bold
-        .SelItalic = italic
-        
-        If Not red = -1 Then .SelColor = RGB(red, green, blue)
-        
-        If bCrLf And Len(.Text) > 0 Then Text = vbCrLf & Text
-        .SelText = Text
-        
-        RichTextBox.Refresh
-
-    End With
+    End If
 
 End Sub
 
-Public Function ColorToDX8(ByVal long_color As Long) As Long
+Public Function GetElapsedTime() As Single
 
-    ' DX8 engine
-    Dim temp_color As String
-    Dim red        As Integer, blue As Integer, green As Integer
-    
-    temp_color = Hex$(long_color)
+    '**************************************************************
+    'Author: Aaron Perkins
+    'Last Modify Date: 10/07/2002
+    'Gets the time that past since the last call
+    '**************************************************************
+    Dim start_time    As Currency
 
-    If Len(temp_color) < 6 Then
-        'Give is 6 digits for easy RGB conversion.
-        temp_color = String$(6 - Len(temp_color), "0") + temp_color
+    Static end_time   As Currency
+
+    Static timer_freq As Currency
+
+    'Get the timer frequency
+    If timer_freq = 0 Then
+        QueryPerformanceFrequency timer_freq
+
     End If
+
+    'Get current time
+    QueryPerformanceCounter start_time
     
-    red = CLng("&H" + mid$(temp_color, 1, 2))
-    green = CLng("&H" + mid$(temp_color, 3, 2))
-    blue = CLng("&H" + mid$(temp_color, 5, 2))
+    'Calculate elapsed time
+    GetElapsedTime = (start_time - end_time) / timer_freq * 1000
     
-    ColorToDX8 = D3DColorXRGB(red, green, blue)
+    'Get next end time
+    QueryPerformanceCounter end_time
 
 End Function
-
-'Solo se usa para el minimapa
-Public Function ReturnNumberFromString(ByVal sString As String) As String
-   
-   Dim i As Integer
-   
-   For i = 1 To LenB(sString)
-   
-       If mid$(sString, i, 1) Like "[0-9]" Then
-           ReturnNumberFromString = ReturnNumberFromString + mid$(sString, i, 1)
-       End If
-       
-   Next i
-   
-End Function
-
-Private Function DirExists(Path As String) As Boolean
-On Error GoTo error
-
-    Dim Val As Integer
-    Val = GetAttr(Path) And vbDirectory
-    If Val <> 0 Then
-        DirExists = True
-     Else
-        DirExists = False
-    End If
-
-Exit Function
-
-error:
-
-    If Err.Number = 53 Then
-        DirExists = False
-    End If
-
-End Function
-
-Public Sub CheckResources()
-    
-    Call CheckDir(InitPath)
-    Call CheckDir(DirDats)
-    Call CheckDir(DirMinimapas)
-    Call CheckDir(DirAudio)
-    
-    Call CheckFile(InitPath, ClientPath, "Graficos.ini")
-    Call CheckFile(InitPath, ClientPath, "Graficos.ind")
-    Call CheckFile(InitPath, ClientPath, "Triggers.ini")
-    Call CheckFile(InitPath, ClientPath, "Personajes.ind")
-    Call CheckFile(InitPath, ClientPath, "Cabezas.ind")
-    Call CheckFile(InitPath, ClientPath, "Minimap.dat")
-    Call CheckFile(InitPath, ClientPath, "Particulas.ini")
-    Call CheckFile(DirDats, ServerPath, "OBJ.dat")
-    Call CheckFile(DirDats, ServerPath, "NPCs.dat")
-    
-End Sub
-
-Private Sub CheckDir(Path As String)
-    If DirExists(Path) = False Then
-        MkDir Path
-    End If
-End Sub
-
-Private Function CheckFile(WherePath As String, FromPath As String, FileName As String) As Boolean
-
-    CheckFile = False
-    If Dir(WherePath & FileName) = vbNullString Then
-        If DirExists(FromPath) = True And Dir(FromPath & FileName) <> vbNullString Then
-            Call FileCopy(FromPath & FileName, WherePath & FileName)
-        End If
-    End If
-    If Dir(WherePath & FileName) <> vbNullString Then
-        CheckFile = True
-    End If
-
-End Function
-

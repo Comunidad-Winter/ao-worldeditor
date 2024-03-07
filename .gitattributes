@@ -1,8 +1,5 @@
 # Auto-CRLF setting.
 * text eol=crlf
-/Recursos/Fonts/font1.dat eol=lf
-/Recursos/Fonts/font2.dat eol=lf
-/Recursos/Fonts/font3.dat eol=lf
 
 # Declare file types.
 # The - is a negation symbol, so  -text it means"not" text
@@ -26,8 +23,8 @@
 *.ocx -text
 *.OCX -text
 *.map -text
+*.csm -text
 *.exe -text
-*.inf -text
 
 # Declare encoding of all files for code.
 *.bas encoding=ansi
@@ -35,4 +32,3 @@
 *.vbp encoding=ansi
 *.frm encoding=ansi
 *.json encoding=ansi
-*.dat encoding=ansi

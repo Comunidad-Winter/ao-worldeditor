@@ -13,11 +13,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Declare Sub CopyMemory _
-                Lib "kernel32" _
-                Alias "RtlMoveMemory" (lpvDest As Any, _
-                                       lpvSource As Any, _
-                                       ByVal cbCopy As Long)
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 
 Private Type SAFEARRAYBOUND
 
@@ -37,9 +33,7 @@ Private Type SAFEARRAY2D
 
 End Type
 
-Private Declare Function VarPtrArray _
-                Lib "msvbvm50.dll" _
-                Alias "VarPtr" (Ptr() As Any) As Long
+Private Declare Function VarPtrArray Lib "msvbvm50.dll" Alias "VarPtr" (Ptr() As Any) As Long
 
 Private Type RGBQUAD
 
@@ -75,57 +69,25 @@ End Type
 
 Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
 
-Private Declare Function GetDC Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 
 Private Declare Function GetDesktopWindow Lib "user32" () As Long
 
 ' Note - this is not the declare in the API viewer - modify lplpVoid to be
 ' Byref so we get the pointer back:
-Private Declare Function CreateDIBSection _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             pBitmapInfo As BITMAPINFO, _
-                             ByVal un As Long, _
-                             lplpVoid As Long, _
-                             ByVal Handle As Long, _
-                             ByVal dw As Long) As Long
+Private Declare Function CreateDIBSection Lib "gdi32" (ByVal hdc As Long, pBitmapInfo As BITMAPINFO, ByVal un As Long, lplpVoid As Long, ByVal handle As Long, ByVal dw As Long) As Long
 
-Private Declare Function BitBlt _
-                Lib "gdi32" (ByVal hDestDC As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal hSrcDC As Long, _
-                             ByVal xSrc As Long, _
-                             ByVal ySrc As Long, _
-                             ByVal dwRop As Long) As Long
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 
-Private Declare Function SelectObject _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal hObject As Long) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
 
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 
 Private Declare Function DeleteDC Lib "gdi32" (ByVal hdc As Long) As Long
 
-Private Declare Function ReleaseDC _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal hdc As Long) As Long
-
-Private Declare Function LoadImage _
-                Lib "user32" _
-                Alias "LoadImageA" (ByVal hInst As Long, _
-                                    ByVal lpsz As String, _
-                                    ByVal un1 As Long, _
-                                    ByVal n1 As Long, _
-                                    ByVal n2 As Long, _
-                                    ByVal un2 As Long) As Long
+Private Declare Function ReleaseDC Lib "user32" (ByVal hWnd As Long, ByVal hdc As Long) As Long
 
 Private Const BI_RGB = 0&
-
-Private Const BI_RLE4 = 2&
-
-Private Const BI_RLE8 = 1&
 
 Private Const DIB_RGB_COLORS = 0 '  color table in RGBs
 
@@ -141,33 +103,20 @@ Private Type BITMAP
 
 End Type
 
-Private Declare Function GetObjectAPI _
-                Lib "gdi32" _
-                Alias "GetObjectA" (ByVal hObject As Long, _
-                                    ByVal nCount As Long, _
-                                    lpObject As Any) As Long
+Private Declare Function GetObjectAPI Lib "gdi32" Alias "GetObjectA" (ByVal hObject As Long, ByVal nCount As Long, lpObject As Any) As Long
 
-Private Declare Function timeGetTime Lib "winmm.dll" () As Long
-
-Private Declare Function CreateCompatibleBitmap _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long) As Long
+Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
 
 ' Clipboard functions:
-Private Declare Function OpenClipboard Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function OpenClipboard Lib "user32" (ByVal hWnd As Long) As Long
 
 Private Declare Function CloseClipboard Lib "user32" () As Long
 
-Private Declare Function SetClipboardData _
-                Lib "user32" (ByVal wFormat As Long, _
-                              ByVal hMem As Long) As Long
+Private Declare Function SetClipboardData Lib "user32" (ByVal wFormat As Long, ByVal hMem As Long) As Long
 
 Private Declare Function EmptyClipboard Lib "user32" () As Long
 
 Private Const CF_BITMAP = 2
-
-Private Const CF_DIB = 8
 
 ' Handle to the current DIBSection:
 Private m_hDIb    As Long
@@ -195,14 +144,6 @@ Public Function CopyToClipboard(Optional ByVal bAsDIB As Boolean = True) As Bool
     Dim hObj        As Long
 
     Dim lFmt        As Long
-
-    Dim B()         As Byte
-
-    Dim tBI         As BITMAPINFO
-
-    Dim lPtr        As Long
-
-    Dim hDibCopy    As Long
 
     lhDCDesktop = GetDC(GetDesktopWindow())
 
@@ -270,10 +211,7 @@ Public Function CopyToClipboard(Optional ByVal bAsDIB As Boolean = True) As Bool
 
 End Function
 
-Public Function CreateDIB(ByVal lhDC As Long, _
-                          ByVal lWidth As Long, _
-                          ByVal lHeight As Long, _
-                          ByRef hDib As Long) As Boolean
+Public Function CreateDIB(ByVal lhDC As Long, ByVal lWidth As Long, ByVal lHeight As Long, ByRef hDib As Long) As Boolean
 
     With m_tBI.bmiHeader
         .biSize = Len(m_tBI.bmiHeader)
@@ -303,7 +241,7 @@ Public Function CreateFromPicture(ByRef picThis As StdPicture)
 
     Dim lhWnd       As Long
     
-    GetObjectAPI picThis.Handle, Len(tBMP), tBMP
+    GetObjectAPI picThis.handle, Len(tBMP), tBMP
 
     If (Create(tBMP.bmWidth, tBMP.bmHeight)) Then
         lhWnd = GetDesktopWindow()
@@ -314,7 +252,7 @@ Public Function CreateFromPicture(ByRef picThis As StdPicture)
             ReleaseDC lhWnd, lhDCDesktop
 
             If (lhDC <> 0) Then
-                lhBmpOld = SelectObject(lhDC, picThis.Handle)
+                lhBmpOld = SelectObject(lhDC, picThis.handle)
                 LoadPictureBlt lhDC
                 SelectObject lhDC, lhBmpOld
                 DeleteDC lhDC
@@ -361,12 +299,7 @@ Public Property Get Height() As Long
 
 End Property
 
-Public Sub LoadPictureBlt(ByVal lhDC As Long, _
-                          Optional ByVal lSrcLeft As Long = 0, _
-                          Optional ByVal lSrcTop As Long = 0, _
-                          Optional ByVal lSrcWidth As Long = -1, _
-                          Optional ByVal lSrcHeight As Long = -1, _
-                          Optional ByVal eRop As RasterOpConstants = vbSrcCopy)
+Public Sub LoadPictureBlt(ByVal lhDC As Long, Optional ByVal lSrcLeft As Long = 0, Optional ByVal lSrcTop As Long = 0, Optional ByVal lSrcWidth As Long = -1, Optional ByVal lSrcHeight As Long = -1, Optional ByVal eRop As RasterOpConstants = vbSrcCopy)
 
     If lSrcWidth < 0 Then lSrcWidth = m_tBI.bmiHeader.biWidth
     If lSrcHeight < 0 Then lSrcHeight = m_tBI.bmiHeader.biHeight
@@ -374,14 +307,7 @@ Public Sub LoadPictureBlt(ByVal lhDC As Long, _
 
 End Sub
 
-Public Sub PaintPicture(ByVal lhDC As Long, _
-                        Optional ByVal lDestLeft As Long = 0, _
-                        Optional ByVal lDestTop As Long = 0, _
-                        Optional ByVal lDestWidth As Long = -1, _
-                        Optional ByVal lDestHeight As Long = -1, _
-                        Optional ByVal lSrcLeft As Long = 0, _
-                        Optional ByVal lSrcTop As Long = 0, _
-                        Optional ByVal eRop As RasterOpConstants = vbSrcCopy)
+Public Sub PaintPicture(ByVal lhDC As Long, Optional ByVal lDestLeft As Long = 0, Optional ByVal lDestTop As Long = 0, Optional ByVal lDestWidth As Long = -1, Optional ByVal lDestHeight As Long = -1, Optional ByVal lSrcLeft As Long = 0, Optional ByVal lSrcTop As Long = 0, Optional ByVal eRop As RasterOpConstants = vbSrcCopy)
 
     If (lDestWidth < 0) Then lDestWidth = m_tBI.bmiHeader.biWidth
     If (lDestHeight < 0) Then lDestHeight = m_tBI.bmiHeader.biHeight
@@ -431,7 +357,7 @@ Public Sub RandomiseBits(Optional ByVal bGray As Boolean = False)
     CopyMemory ByVal VarPtrArray(bDib()), VarPtr(tSA), 4
 
     ' random:
-    Randomize Timer
+    Randomize timer
     
     xEnd = (Width - 1) * 3
 

@@ -151,7 +151,7 @@ Private Sub txtGRH_Change()
     If txtGRH.Text <> "" And IsNumeric(txtGRH.Text) = True Then
         If txtGRH.Text > MaxGrhs Then Exit Sub
         If txtGRH.Text < 1 Then Exit Sub
-        lblBMP.Caption = GrhData(txtGRH.Text).FileNum
+        lblBMP.Caption = Grh_list(txtGRH.Text).texture_index
 
     End If
 

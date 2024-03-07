@@ -72,20 +72,9 @@ Public Event DoubleClick(Button As Integer)   ' added benefit
 
 Public Event OLECompleteDrag(Effect As Long)
 
-Public Event OLEDragDrop(Data As DataObject, _
-                         Effect As Long, _
-                         Button As Integer, _
-                         Shift As Integer, _
-                         X As Single, _
-                         Y As Single)
+Public Event OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
 
-Public Event OLEDragOver(Data As DataObject, _
-                         Effect As Long, _
-                         Button As Integer, _
-                         Shift As Integer, _
-                         X As Single, _
-                         Y As Single, _
-                         State As Integer)
+Public Event OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single, State As Integer)
 
 Public Event OLEGiveFeedback(Effect As Long, DefaultCursors As Boolean)
 
@@ -104,318 +93,130 @@ Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Int
 
 Private Declare Function GetMapMode Lib "gdi32" (ByVal hdc As Long) As Long
 
-Private Declare Function GetGDIObject _
-                Lib "gdi32" _
-                Alias "GetObjectA" (ByVal hObject As Long, _
-                                    ByVal nCount As Long, _
-                                    lpObject As Any) As Long
+Private Declare Function GetGDIObject Lib "gdi32" Alias "GetObjectA" (ByVal hObject As Long, ByVal nCount As Long, lpObject As Any) As Long
 
-Private Declare Function SelectObject _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal hObject As Long) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
 
-Private Declare Function SetMapMode _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal nMapMode As Long) As Long
+Private Declare Function SetMapMode Lib "gdi32" (ByVal hdc As Long, ByVal nMapMode As Long) As Long
 
 ' Region Forming functions
-Private Declare Function CombineRgn _
-                Lib "gdi32" (ByVal hDestRgn As Long, _
-                             ByVal hSrcRgn1 As Long, _
-                             ByVal hSrcRgn2 As Long, _
-                             ByVal nCombineMode As Long) As Long
+Private Declare Function CombineRgn Lib "gdi32" (ByVal hDestRgn As Long, ByVal hSrcRgn1 As Long, ByVal hSrcRgn2 As Long, ByVal nCombineMode As Long) As Long
 
 Private Const RGN_DIFF = 4
 
-Private Declare Function CreateEllipticRgn _
-                Lib "gdi32" (ByVal X1 As Long, _
-                             ByVal Y1 As Long, _
-                             ByVal X2 As Long, _
-                             ByVal Y2 As Long) As Long
+Private Declare Function CreateEllipticRgn Lib "gdi32" (ByVal x1 As Long, ByVal Y1 As Long, ByVal x2 As Long, ByVal Y2 As Long) As Long
 
-Private Declare Function CreatePolygonRgn _
-                Lib "gdi32" (lpPoint As POINTAPI, _
-                             ByVal nCount As Long, _
-                             ByVal nPolyFillMode As Long) As Long
+Private Declare Function CreatePolygonRgn Lib "gdi32" (lpPoint As POINTAPI, ByVal nCount As Long, ByVal nPolyFillMode As Long) As Long
 
-Private Declare Function CreateRectRgn _
-                Lib "gdi32" (ByVal X1 As Long, _
-                             ByVal Y1 As Long, _
-                             ByVal X2 As Long, _
-                             ByVal Y2 As Long) As Long
+Private Declare Function CreateRectRgn Lib "gdi32" (ByVal x1 As Long, ByVal Y1 As Long, ByVal x2 As Long, ByVal Y2 As Long) As Long
 
-Private Declare Function GetRgnBox _
-                Lib "gdi32" (ByVal hRgn As Long, _
-                             lpRect As RECT) As Long
+Private Declare Function GetRgnBox Lib "gdi32" (ByVal hRgn As Long, lpRect As RECT) As Long
 
-Private Declare Function SelectClipRgn _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal hRgn As Long) As Long
+Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hdc As Long, ByVal hRgn As Long) As Long
 
-Private Declare Function OffsetRgn _
-                Lib "gdi32" (hRgn As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long) As Long
+Private Declare Function OffsetRgn Lib "gdi32" (hRgn As Long, ByVal X As Long, ByVal Y As Long) As Long
 
 ' Other drawing functions
-Private Declare Function Arc _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal nLeftRect As Long, _
-                             ByVal nTopRect As Long, _
-                             ByVal nRightRect As Long, _
-                             ByVal nBottomRect As Long, _
-                             ByVal nXStartArc As Long, _
-                             ByVal nYStartArc As Long, _
-                             ByVal nXEndArc As Long, _
-                             ByVal nYEndArc As Long) As Long
+Private Declare Function Arc Lib "gdi32" (ByVal hdc As Long, ByVal nLeftRect As Long, ByVal nTopRect As Long, ByVal nRightRect As Long, ByVal nBottomRect As Long, ByVal nXStartArc As Long, ByVal nYStartArc As Long, ByVal nXEndArc As Long, ByVal nYEndArc As Long) As Long
 
-Private Declare Function BitBlt _
-                Lib "gdi32" (ByVal hDestDC As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal hSrcDC As Long, _
-                             ByVal xSrc As Long, _
-                             ByVal ySrc As Long, _
-                             ByVal dwRop As Long) As Long
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 
-Private Declare Function CreateBitmap _
-                Lib "gdi32" (ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal nPlanes As Long, _
-                             ByVal nBitCount As Long, _
-                             lpBits As Any) As Long
+Private Declare Function CreateBitmap Lib "gdi32" (ByVal nWidth As Long, ByVal nHeight As Long, ByVal nPlanes As Long, ByVal nBitCount As Long, lpBits As Any) As Long
 
-Private Declare Function CreateCompatibleBitmap _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long) As Long
+Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
 
-Private Declare Function CreateFontIndirect _
-                Lib "gdi32" _
-                Alias "CreateFontIndirectA" (lpLogFont As LOGFONT) As Long
+Private Declare Function CreateFontIndirect Lib "gdi32" Alias "CreateFontIndirectA" (lpLogFont As LOGFONT) As Long
 
-Private Declare Function CreatePen _
-                Lib "gdi32" (ByVal nPenStyle As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal crColor As Long) As Long
+Private Declare Function CreatePen Lib "gdi32" (ByVal nPenStyle As Long, ByVal nWidth As Long, ByVal crColor As Long) As Long
 
 Private Declare Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As Long
 
-Private Declare Function FrameRgn _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal hRgn As Long, _
-                             ByVal hBrush As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long) As Long
+Private Declare Function FrameRgn Lib "gdi32" (ByVal hdc As Long, ByVal hRgn As Long, ByVal hBrush As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
 
 Private Declare Function GetBkColor Lib "gdi32" (ByVal hdc As Long) As Long
 
-Private Declare Function GetPixel _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long) As Long
+Private Declare Function GetPixel Lib "gdi32" (ByVal hdc As Long, ByVal X As Long, ByVal Y As Long) As Long
 
 Private Declare Function GetSysColor Lib "user32" (ByVal nIndex As Long) As Long
 
 Private Declare Function GetTextColor Lib "gdi32" (ByVal hdc As Long) As Long
 
-Private Declare Function PatBlt _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal dwRop As Long) As Long
+Private Declare Function PatBlt Lib "gdi32" (ByVal hdc As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal dwRop As Long) As Long
 
-Private Declare Function Polyline _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             lpPoint As POINTAPI, _
-                             ByVal nCount As Long) As Long
+Private Declare Function Polyline Lib "gdi32" (ByVal hdc As Long, lpPoint As POINTAPI, ByVal nCount As Long) As Long
 
 Private Declare Function RealizePalette Lib "gdi32" (ByVal hdc As Long) As Long
 
-Private Declare Function Rectangle _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal X1 As Long, _
-                             ByVal Y1 As Long, _
-                             ByVal X2 As Long, _
-                             ByVal Y2 As Long) As Long
+Private Declare Function Rectangle Lib "gdi32" (ByVal hdc As Long, ByVal x1 As Long, ByVal Y1 As Long, ByVal x2 As Long, ByVal Y2 As Long) As Long
 
-Private Declare Function SelectPalette _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal hPalette As Long, _
-                             ByVal bForceBackground As Long) As Long
+Private Declare Function SelectPalette Lib "gdi32" (ByVal hdc As Long, ByVal hPalette As Long, ByVal bForceBackground As Long) As Long
 
-Private Declare Function SetBkColor _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal crColor As Long) As Long
+Private Declare Function SetBkColor Lib "gdi32" (ByVal hdc As Long, ByVal crColor As Long) As Long
 
-Private Declare Function SetBkMode _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal nBkMode As Long) As Long
+Private Declare Function SetBkMode Lib "gdi32" (ByVal hdc As Long, ByVal nBkMode As Long) As Long
 
-Private Declare Function SetPixel _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long, _
-                             ByVal crColor As Long) As Long
+Private Declare Function SetPixel Lib "gdi32" (ByVal hdc As Long, ByVal X As Long, ByVal Y As Long, ByVal crColor As Long) As Long
 
-Private Declare Function SetTextColor _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal crColor As Long) As Long
+Private Declare Function SetTextColor Lib "gdi32" (ByVal hdc As Long, ByVal crColor As Long) As Long
 
-Private Declare Function StretchBlt _
-                Lib "gdi32" (ByVal hdc As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal hSrcDC As Long, _
-                             ByVal xSrc As Long, _
-                             ByVal ySrc As Long, _
-                             ByVal nSrcWidth As Long, _
-                             ByVal nSrcHeight As Long, _
-                             ByVal dwRop As Long) As Long
+Private Declare Function StretchBlt Lib "gdi32" (ByVal hdc As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal nSrcWidth As Long, ByVal nSrcHeight As Long, ByVal dwRop As Long) As Long
 
 ' KERNEL32 Function Calls
 ' =====================================================================
-Private Declare Sub CopyMemory _
-                Lib "kernel32" _
-                Alias "RtlMoveMemory" (pDest As Any, _
-                                       pSource As Any, _
-                                       ByVal ByteLen As Long)
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (pDest As Any, pSource As Any, ByVal ByteLen As Long)
 
 ' USER32 Function Calls
 ' =====================================================================
 ' General Windows related functions
-Private Declare Function CopyImage _
-                Lib "user32" (ByVal Handle As Long, _
-                              ByVal imageType As Long, _
-                              ByVal newWidth As Long, _
-                              ByVal newHeight As Long, _
-                              ByVal lFlags As Long) As Long
+Private Declare Function CopyImage Lib "user32" (ByVal handle As Long, ByVal imageType As Long, ByVal newWidth As Long, ByVal newHeight As Long, ByVal lFlags As Long) As Long
 
-Private Declare Function DestroyIcon Lib "user32" (ByVal hIcon As Long) As Long
+Private Declare Function DrawFocusRect Lib "user32" (ByVal hdc As Long, lpRect As RECT) As Long
 
-Private Declare Function DrawFocusRect _
-                Lib "user32" (ByVal hdc As Long, _
-                              lpRect As RECT) As Long
+Private Declare Function DrawIconEx Lib "user32" (ByVal hdc As Long, ByVal xLeft As Long, ByVal yTop As Long, ByVal hIcon As Long, ByVal cxWidth As Long, ByVal cyWidth As Long, ByVal istepIfAniCur As Long, ByVal hbrFlickerFreeDraw As Long, ByVal diFlags As Long) As Long
 
-Private Declare Function DrawIconEx _
-                Lib "user32" (ByVal hdc As Long, _
-                              ByVal xLeft As Long, _
-                              ByVal yTop As Long, _
-                              ByVal hIcon As Long, _
-                              ByVal cxWidth As Long, _
-                              ByVal cyWidth As Long, _
-                              ByVal istepIfAniCur As Long, _
-                              ByVal hbrFlickerFreeDraw As Long, _
-                              ByVal diFlags As Long) As Long
-
-Private Declare Function DrawText _
-                Lib "user32" _
-                Alias "DrawTextA" (ByVal hdc As Long, _
-                                   ByVal lpStr As String, _
-                                   ByVal nCount As Long, _
-                                   lpRect As RECT, _
-                                   ByVal wFormat As Long) As Long
+Private Declare Function DrawText Lib "user32" Alias "DrawTextA" (ByVal hdc As Long, ByVal lpStr As String, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
 
 Private Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
 
-Private Declare Function GetDC Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 
-Private Declare Function GetIconInfo _
-                Lib "user32" (ByVal hIcon As Long, _
-                              piconinfo As ICONINFO) As Long
+Private Declare Function GetIconInfo Lib "user32" (ByVal hIcon As Long, piconinfo As ICONINFO) As Long
 
-Private Declare Function GetProp _
-                Lib "user32" _
-                Alias "GetPropA" (ByVal hwnd As Long, _
-                                  ByVal lpString As String) As Long
+Private Declare Function GetProp Lib "user32" Alias "GetPropA" (ByVal hWnd As Long, ByVal lpString As String) As Long
 
-Private Declare Function GetWindowRect _
-                Lib "user32" (ByVal hwnd As Long, _
-                              lpRect As RECT) As Long
+Private Declare Function GetWindowRect Lib "user32" (ByVal hWnd As Long, lpRect As RECT) As Long
 
-Private Declare Function GetWindowRgn _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal hRgn As Long) As Long
+Private Declare Function GetWindowRgn Lib "user32" (ByVal hWnd As Long, ByVal hRgn As Long) As Long
 
-Private Declare Function InflateRect _
-                Lib "user32" (lpRect As RECT, _
-                              ByVal X As Long, _
-                              ByVal Y As Long) As Long
+Private Declare Function InflateRect Lib "user32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
 
-Private Declare Function KillTimer _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal nIDEvent As Long) As Long
+Private Declare Function KillTimer Lib "user32" (ByVal hWnd As Long, ByVal nIDEvent As Long) As Long
 
-Private Declare Function MoveWindow _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal X As Long, _
-                              ByVal Y As Long, _
-                              ByVal nWidth As Long, _
-                              ByVal nHeight As Long, _
-                              ByVal bRepaint As Long) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
 
-Private Declare Function OffsetRect _
-                Lib "user32" (lpRect As RECT, _
-                              ByVal X As Long, _
-                              ByVal Y As Long) As Long
+Private Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
 
-Private Declare Function PostMessage _
-                Lib "user32" _
-                Alias "PostMessageA" (ByVal hwnd As Long, _
-                                      ByVal wMsg As Long, _
-                                      ByVal wParam As Long, _
-                                      ByVal lParam As Long) As Long
+Private Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 
 Private Declare Function ReleaseCapture Lib "user32" () As Long
 
-Private Declare Function ReleaseDC _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal hdc As Long) As Long
+Private Declare Function ReleaseDC Lib "user32" (ByVal hWnd As Long, ByVal hdc As Long) As Long
 
-Private Declare Function RemoveProp _
-                Lib "user32" _
-                Alias "RemovePropA" (ByVal hwnd As Long, _
-                                     ByVal lpString As String) As Long
+Private Declare Function RemoveProp Lib "user32" Alias "RemovePropA" (ByVal hWnd As Long, ByVal lpString As String) As Long
 
-Private Declare Function ScreenToClient _
-                Lib "user32" (ByVal hwnd As Long, _
-                              lpPoint As POINTAPI) As Long
+Private Declare Function ScreenToClient Lib "user32" (ByVal hWnd As Long, lpPoint As POINTAPI) As Long
 
-Private Declare Function SetCapture Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function SetCapture Lib "user32" (ByVal hWnd As Long) As Long
 
-Private Declare Function SetProp _
-                Lib "user32" _
-                Alias "SetPropA" (ByVal hwnd As Long, _
-                                  ByVal lpString As String, _
-                                  ByVal hData As Long) As Long
+Private Declare Function SetProp Lib "user32" Alias "SetPropA" (ByVal hWnd As Long, ByVal lpString As String, ByVal hData As Long) As Long
 
-Private Declare Function SetRect _
-                Lib "user32" (lpRect As RECT, _
-                              ByVal X1 As Long, _
-                              ByVal Y1 As Long, _
-                              ByVal X2 As Long, _
-                              ByVal Y2 As Long) As Long
+Private Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal x1 As Long, ByVal Y1 As Long, ByVal x2 As Long, ByVal Y2 As Long) As Long
 
-Private Declare Function SetTimer _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal nIDEvent As Long, _
-                              ByVal uElapse As Long, _
-                              ByVal lpTimerFunc As Long) As Long
+Private Declare Function SetTimer Lib "user32" (ByVal hWnd As Long, ByVal nIDEvent As Long, ByVal uElapse As Long, ByVal lpTimerFunc As Long) As Long
 
-Private Declare Function SetWindowRgn _
-                Lib "user32" (ByVal hwnd As Long, _
-                              ByVal hRgn As Long, _
-                              ByVal bRedraw As Long) As Long
+Private Declare Function SetWindowRgn Lib "user32" (ByVal hWnd As Long, ByVal hRgn As Long, ByVal bRedraw As Long) As Long
 
-Private Declare Function WindowFromPoint _
-                Lib "user32" (ByVal xPoint As Long, _
-                              ByVal yPoint As Long) As Long
+Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
 
 ' Standard TYPE Declarations used
 ' =====================================================================
@@ -428,8 +229,8 @@ End Type
 
 Private Type RECT                    ' used to set/ref boundaries of a rectangle
 
-    Left As Long
-    Top As Long
+    left As Long
+    top As Long
     Right As Long
     Bottom As Long
 
@@ -803,7 +604,7 @@ Attribute CaptionAlign.VB_ProcData.VB_Invoke_PropertyPut = ";Appearance"
     If myImage.Align > lv_RightOfCaption And nAlign < vbCenter And (myImage.SourceSize.X + myImage.SourceSize.Y) > 0 Then
 
         ' also prevent left/right justifying captions when image is centered in caption
-        If UserControl.ambient.UserMode = False Then
+        If UserControl.Ambient.UserMode = False Then
             ' if not in user mode, then explain whey it is prevented
             MsgBox "When button images are aligned top/bottom center, " & vbCrLf & "button captions can only be center aligned", vbOKOnly + vbInformation
 
@@ -851,7 +652,7 @@ Public Property Let CustomClick(nOpt As CustomCickConstants)
 Attribute CustomClick.VB_Description = "Custom shaped buttons only. Moves the button vs the traditional click effect."
 
     If nOpt < lv_cDefault Or nOpt > lv_cWest Then Exit Property
-    If Not ambient.UserMode And myProps.bShape < lv_CustomFlat And nOpt > lv_cDefault Then
+    If Not Ambient.UserMode And myProps.bShape < lv_CustomFlat And nOpt > lv_cDefault Then
         MsgBox "This property has no effect unless the Button Shape is a custom shape.", vbInformation + vbOKOnly
 
     End If
@@ -875,7 +676,7 @@ Attribute ButtonShape.VB_ProcData.VB_Invoke_PropertyPut = ";Appearance"
     If nShape < lv_Rectangular Or nShape > lv_Custom3DBorder Then Exit Property
     If nShape > lv_RoundFlat Then   ' custom shapes
         If Me.Picture Is Nothing Or myImage.Type = CI_ICON Then
-            If Not ambient.UserMode Then MsgBox "The Picture Property must be assigned first and must be a bitmap or JPEG.", vbInformation + vbOKOnly
+            If Not Ambient.UserMode Then MsgBox "The Picture Property must be assigned first and must be a bitmap or JPEG.", vbInformation + vbOKOnly
             Exit Property
         Else
 
@@ -922,7 +723,7 @@ Attribute Picture.VB_Description = "The image used to display on the button."
             If myImage.Type = CI_ICON Then
                 Me.ButtonShape = lv_Rectangular
 
-                If Not ambient.UserMode Then MsgBox "Icons cannot be used for custom buttons. Only use bitmaps or JPEGs." & vbCrLf & "Button was changed to Rectangular shaped.", vbInformation + vbOKOnly
+                If Not Ambient.UserMode Then MsgBox "Icons cannot be used for custom buttons. Only use bitmaps or JPEGs." & vbCrLf & "Button was changed to Rectangular shaped.", vbInformation + vbOKOnly
 
             End If
 
@@ -1005,7 +806,7 @@ Attribute ShowFocusRect.VB_ProcData.VB_Invoke_PropertyPut = ";Appearance"
     If ((myProps.bStatus And 1) = 1) Then
 
         ' if currently has the focus, then we take it off
-        If ambient.UserMode Then
+        If Ambient.UserMode Then
             myProps.bStatus = myProps.bStatus And Not 1
             RedrawButton
         Else
@@ -1037,7 +838,7 @@ Attribute value.VB_UserMemId = 0
     If myProps.bMode = lv_CommandButton And bValue = True Then
 
         ' TRUE values for command buttons not allowed
-        If Not UserControl.ambient.UserMode Then
+        If Not UserControl.Ambient.UserMode Then
             MsgBox "This property is not applicable for command button modes.", vbInformation + vbOKOnly
 
         End If
@@ -1067,7 +868,7 @@ Attribute PictureSize.VB_Description = "Various sizes for images used on buttons
 
     If PictureSize < lv_16x16 Or PictureSize > lv_Fill_ScaleUpDown Then Exit Property
     If myProps.bShape > lv_RoundFlat Then
-        If Not ambient.UserMode Then MsgBox "The picture size cannot be changed for Shaped buttons", vbInformation + vbOKOnly
+        If Not Ambient.UserMode Then MsgBox "The picture size cannot be changed for Shaped buttons", vbInformation + vbOKOnly
         Exit Property
 
     End If
@@ -1122,7 +923,7 @@ Attribute MouseIcon.VB_Description = "Icon or cursor used to display when mouse 
     Exit Property
 ShowPropertyError:
 
-    If ambient.UserMode = False Then MsgBox Err.Description, vbInformation + vbOKOnly, "Select .ico Or .cur Files Only"
+    If Ambient.UserMode = False Then MsgBox Err.Description, vbInformation + vbOKOnly, "Select .ico Or .cur Files Only"
 
 End Property
 
@@ -1299,7 +1100,7 @@ Attribute ResetDefaultColors.VB_ProcData.VB_Invoke_PropertyPut = ";Appearance"
     ' Resets the BackColor, ForeColor, GradientColor,
     ' HoverBackColor & HoverForeColor to defaults
 
-    If ambient.UserMode Or nDefault = False Then Exit Property
+    If Ambient.UserMode Or nDefault = False Then Exit Property
     DelayDrawing True
     curBackColor = vbButtonFace
     Me.ForeColor = vbButtonText
@@ -1440,11 +1241,11 @@ Public Property Get hdc() As Long
 
 End Property
 
-Public Property Get hwnd() As Long
+Public Property Get hWnd() As Long
 
     ' Makes the control's hWnd available at runtime
 
-    hwnd = UserControl.hwnd
+    hWnd = UserControl.hWnd
 
 End Property
 
@@ -1530,7 +1331,7 @@ Private Sub RedrawButton()
                         If myProps.bBackStyle <> 2 Then FocusColor = adjHoverColor
                         If myProps.bBackStyle = 2 Or FocusColor <> ConvertColor(curBackColor) Then
                             tRgn = CreateRectRgn(0, 0, 0, 0)
-                            GetWindowRgn UserControl.hwnd, tRgn
+                            GetWindowRgn UserControl.hWnd, tRgn
 
                         End If
 
@@ -1552,7 +1353,7 @@ Private Sub RedrawButton()
 
                         If myProps.bShape = lv_RoundFlat Then       ' flat round button
                             tRgn = CreateRectRgn(0, 0, 0, 0)
-                            GetWindowRgn UserControl.hwnd, tRgn
+                            GetWindowRgn UserControl.hWnd, tRgn
 
                         End If
 
@@ -1679,13 +1480,13 @@ Friend Sub TimerUpdate(lvTimerID As Long)
     ' especially useful for my diagonal/round buttons since they are not your typical
     ' rectangular shape.
 
-    Dim mousePt As POINTAPI, cRect As RECT
+    Dim mousePt As POINTAPI
 
     GetCursorPos mousePt
 
-    If WindowFromPoint(mousePt.X, mousePt.Y) <> UserControl.hwnd Then
+    If WindowFromPoint(mousePt.X, mousePt.Y) <> UserControl.hWnd Then
         ' when exits button area, kill the timer
-        KillTimer UserControl.hwnd, lvTimerID
+        KillTimer UserControl.hWnd, lvTimerID
         myProps.bStatus = myProps.bStatus And Not 4
         bTimerActive = False
         bNoRefresh = False
@@ -1746,7 +1547,7 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
             Select Case myImage.Align
 
                 Case lv_LeftEdge, lv_LeftOfCaption
-                    imgOffset.Left = myImage.Size
+                    imgOffset.left = myImage.Size
                     bImgWidthAdj = True
 
                 Case lv_RightEdge, lv_RightOfCaption
@@ -1754,7 +1555,7 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
                     bImgWidthAdj = True
 
                 Case lv_TopCenter
-                    imgOffset.Top = myImage.Size
+                    imgOffset.top = myImage.Size
                     bImgHeightAdj = True
 
                 Case lv_BottomCenter
@@ -1793,21 +1594,21 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
         Select Case myProps.bCaptionAlign
 
             Case vbLeftJustify
-                OffsetRect tRect, imgOffset.Left + lEdge + 4 + (Abs(CInt(imgOffset.Left > 0) * 4)), 0
+                OffsetRect tRect, imgOffset.left + lEdge + 4 + (Abs(CInt(imgOffset.left > 0) * 4)), 0
 
             Case vbRightJustify
                 OffsetRect tRect, rEdge - imgOffset.Right - 4 - cRect.Right - (Abs(CInt(imgOffset.Right > 0) * 4)), 0
 
             Case vbCenter
 
-                If imgOffset.Left > 0 And myImage.Align = lv_LeftOfCaption Then
-                    OffsetRect tRect, (adjWidth - (imgOffset.Left + cRect.Right + 4)) \ 2 + lEdge + 4 + imgOffset.Left, 0
+                If imgOffset.left > 0 And myImage.Align = lv_LeftOfCaption Then
+                    OffsetRect tRect, (adjWidth - (imgOffset.left + cRect.Right + 4)) \ 2 + lEdge + 4 + imgOffset.left, 0
                 Else
 
                     If imgOffset.Right > 0 And myImage.Align = lv_RightOfCaption Then
                         OffsetRect tRect, (adjWidth - (imgOffset.Right + cRect.Right + 4)) \ 2 + lEdge, 0
                     Else
-                        OffsetRect tRect, ((adjWidth - (imgOffset.Left + imgOffset.Right)) - cRect.Right) \ 2 + lEdge + imgOffset.Left, 0
+                        OffsetRect tRect, ((adjWidth - (imgOffset.left + imgOffset.Right)) - cRect.Right) \ 2 + lEdge + imgOffset.left, 0
 
                     End If
 
@@ -1823,57 +1624,57 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
         Select Case myImage.Align
 
             Case lv_LeftEdge
-                iRect.Left = lEdge + 4
+                iRect.left = lEdge + 4
 
             Case lv_LeftOfCaption
 
                 If Len(myProps.bCaption) Then
-                    iRect.Left = tRect.Left - 4 - imgOffset.Left
+                    iRect.left = tRect.left - 4 - imgOffset.left
                 Else
-                    iRect.Left = lEdge + 4
+                    iRect.left = lEdge + 4
 
                 End If
 
             Case lv_RightOfCaption
 
                 If Len(myProps.bCaption) Then
-                    iRect.Left = tRect.Right + 4
+                    iRect.left = tRect.Right + 4
                 Else
-                    iRect.Left = rEdge - 4 - imgOffset.Right
+                    iRect.left = rEdge - 4 - imgOffset.Right
 
                 End If
 
             Case lv_RightEdge
-                iRect.Left = rEdge - 4 - imgOffset.Right
+                iRect.left = rEdge - 4 - imgOffset.Right
 
             Case lv_TopCenter
-                iRect.Top = (ScaleHeight - (cRect.Bottom + imgOffset.Top)) \ 2
-                OffsetRect tRect, 0, iRect.Top + 2 + imgOffset.Top
+                iRect.top = (ScaleHeight - (cRect.Bottom + imgOffset.top)) \ 2
+                OffsetRect tRect, 0, iRect.top + 2 + imgOffset.top
 
             Case lv_BottomCenter
-                iRect.Top = (ScaleHeight - (cRect.Bottom + imgOffset.Bottom)) \ 2 + cRect.Bottom + 4
-                OffsetRect tRect, 0, iRect.Top - 2 - cRect.Bottom
+                iRect.top = (ScaleHeight - (cRect.Bottom + imgOffset.Bottom)) \ 2 + cRect.Bottom + 4
+                OffsetRect tRect, 0, iRect.top - 2 - cRect.Bottom
 
         End Select
 
         If myImage.Align < lv_TopCenter Then
             OffsetRect tRect, 0, (ScaleHeight - cRect.Bottom) \ 2
-            iRect.Top = (ScaleHeight - myImage.Size) \ 2
+            iRect.top = (ScaleHeight - myImage.Size) \ 2
         Else
-            iRect.Left = (adjWidth - myImage.Size) \ 2 + lEdge
+            iRect.left = (adjWidth - myImage.Size) \ 2 + lEdge
 
         End If
 
-        iRect.Right = iRect.Left + myImage.Size
-        iRect.Bottom = iRect.Top + myImage.Size
+        iRect.Right = iRect.left + myImage.Size
+        iRect.Bottom = iRect.top + myImage.Size
     Else
         OffsetRect tRect, 0, (ScaleHeight - cRect.Bottom) \ 2
 
     End If
 
     ' sanity checks
-    If tRect.Top < 4 Then tRect.Top = 4
-    If tRect.Left < 4 + lEdge Then tRect.Left = 4 + lEdge
+    If tRect.top < 4 Then tRect.top = 4
+    If tRect.left < 4 + lEdge Then tRect.left = 4 + lEdge
     If tRect.Right > rEdge - 4 Then tRect.Right = rEdge - 4
     If tRect.Bottom > ScaleHeight - 5 Then tRect.Bottom = ScaleHeight - 5
     myProps.bRect = tRect
@@ -1882,8 +1683,8 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
 
         Case Is < 33
 
-            If iRect.Top < 4 Then iRect.Top = 4
-            If iRect.Left < 4 + lEdge Then iRect.Left = 4 + lEdge
+            If iRect.top < 4 Then iRect.top = 4
+            If iRect.left < 4 + lEdge Then iRect.left = 4 + lEdge
             If iRect.Right > rEdge - 4 Then iRect.Right = rEdge - 4
             If iRect.Bottom > ScaleHeight - 5 Then iRect.Bottom = ScaleHeight - 5
 
@@ -1906,10 +1707,10 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
 
                 If (myImage.SourceSize.X + myImage.SourceSize.Y) > 0 Then
                     ScaleImage adjWidth - 12, ScaleHeight - 12, cRect.Right, cRect.Bottom
-                    iRect.Left = (adjWidth - cRect.Right) \ 2 + lEdge
-                    iRect.Top = (ScaleHeight - cRect.Bottom) \ 2
-                    iRect.Right = iRect.Left + cRect.Right
-                    iRect.Bottom = iRect.Top + cRect.Bottom
+                    iRect.left = (adjWidth - cRect.Right) \ 2 + lEdge
+                    iRect.top = (ScaleHeight - cRect.Bottom) \ 2
+                    iRect.Right = iRect.left + cRect.Right
+                    iRect.Bottom = iRect.top + cRect.Bottom
                     bNormalizeImage = True
 
                 End If
@@ -1920,7 +1721,7 @@ Private Sub CalculateBoundingRects(bNormalizeImage As Boolean)
 
     myImage.iRect = iRect
 
-    If bNormalizeImage Then NormalizeImage iRect.Right - iRect.Left, iRect.Bottom - iRect.Top, 0
+    If bNormalizeImage Then NormalizeImage iRect.Right - iRect.left, iRect.Bottom - iRect.top, 0
 
 End Sub
 
@@ -1958,38 +1759,21 @@ Private Sub GetSetOffDC(bSet As Boolean)
 
 End Sub
 
-Private Sub DrawRect(m_hDC As Long, _
-                     ByVal X1 As Long, _
-                     ByVal Y1 As Long, _
-                     ByVal X2 As Long, _
-                     ByVal Y2 As Long, _
-                     tColor As Long, _
-                     Optional pColor As Long = -1, _
-                     Optional PenWidth As Long = 0, _
-                     Optional PenStyle As Long = 0)
+Private Sub DrawRect(m_hDC As Long, ByVal x1 As Long, ByVal Y1 As Long, ByVal x2 As Long, ByVal Y2 As Long, tColor As Long, Optional pColor As Long = -1, Optional PenWidth As Long = 0, Optional PenStyle As Long = 0)
 
     ' Simple routine to draw a rectangle
 
     If pColor <> -1 Then SetButtonColors True, m_hDC, cObj_Pen, pColor, , PenWidth, , PenStyle
     SetButtonColors True, m_hDC, cObj_Brush, tColor, (pColor = -1)
-    Call Rectangle(m_hDC, X1, Y1, X2, Y2)
+    Call Rectangle(m_hDC, x1, Y1, x2, Y2)
 
 End Sub
 
-Private Sub SetButtonColors(bSet As Boolean, _
-                            m_hDC As Long, _
-                            TypeObject As ColorObjects, _
-                            lColor As Long, _
-                            Optional bSamePenColor As Boolean = True, _
-                            Optional PenWidth As Long = 1, _
-                            Optional bSwapPens As Boolean = False, _
-                            Optional PenStyle As Long = 0)
+Private Sub SetButtonColors(bSet As Boolean, m_hDC As Long, TypeObject As ColorObjects, lColor As Long, Optional bSamePenColor As Boolean = True, Optional PenWidth As Long = 1, Optional bSwapPens As Boolean = False, Optional PenStyle As Long = 0)
 
     ' This is the basic routine that sets a DC's pen, brush or font color
 
     ' here we store the most recent "sets" so we can reset when needed
-    Dim tBrush As Long, tPen As Long
-
     If bSet Then    ' changing a DC's setting
 
         Select Case TypeObject
@@ -2080,9 +1864,9 @@ Private Sub CreateButtonRegion()
             ' now we need to align the regions to our button
             GetRgnBox rgn2Use, sRect
             GetRgnBox ButtonDC.ClipBorder, tRect
-            OffsetRgn ButtonDC.ClipBorder, -tRect.Left + sRect.Left + 1, -tRect.Top + sRect.Top + 1
+            OffsetRgn ButtonDC.ClipBorder, -tRect.left + sRect.left + 1, -tRect.top + sRect.top + 1
             GetRgnBox ButtonDC.ClipRgn, tRect
-            OffsetRgn ButtonDC.ClipRgn, -tRect.Left + sRect.Left + 2, -tRect.Top + sRect.Top + 2
+            OffsetRgn ButtonDC.ClipRgn, -tRect.left + sRect.left + 2, -tRect.top + sRect.top + 2
 
             ' create the outer edge border which won't need to be redrawn every time
             If myProps.bShape = lv_Custom3DBorder Then
@@ -2232,7 +2016,7 @@ Private Sub CreateButtonRegion()
     Erase ptTRI
 
     If rgnA Then DeleteObject rgnA
-    SetWindowRgn UserControl.hwnd, rgn2Use, True
+    SetWindowRgn UserControl.hWnd, rgn2Use, True
 
     If myProps.bSegPts.Y = 0 Then myProps.bSegPts.Y = ScaleWidth
 ExitRegionCreator:
@@ -2332,7 +2116,7 @@ Private Sub NormalizeImage(newSizeX As Long, newSizeY As Long, rtnRgn As Long)
     ' Last but not least, the routine also builds the non-rectangular regions for
     ' custom button shapes & returns the regions back to the CreateButtonRegion routine
 
-    Dim cTrans   As Long, lImage As Long
+    Dim cTrans   As Long
 
     Dim valGreen As Long, valRed As Long, valBlue As Long
 
@@ -2353,9 +2137,9 @@ Private Sub NormalizeImage(newSizeX As Long, newSizeY As Long, rtnRgn As Long)
     If myImage.Type Then    ' icons
         myImage.TransImage = CreateCompatibleBitmap(UserControl.hdc, newSizeX, newSizeY)
         oldBMP = SelectObject(newDC, myImage.TransImage)
-        DrawIconEx newDC, 0, 0, myImage.Image.Handle, newSizeX, newSizeY, 0&, 0&, &H3
+        DrawIconEx newDC, 0, 0, myImage.Image.handle, newSizeX, newSizeY, 0&, 0&, &H3
     Else    ' bitmaps
-        myImage.TransImage = CopyImage(myImage.Image.Handle, myImage.Type, newSizeX, newSizeY, ByVal 0&)
+        myImage.TransImage = CopyImage(myImage.Image.handle, myImage.Type, newSizeX, newSizeY, ByVal 0&)
         oldBMP = SelectObject(newDC, myImage.TransImage)
 
     End If
@@ -2402,20 +2186,20 @@ Private Sub NormalizeImage(newSizeX As Long, newSizeY As Long, rtnRgn As Long)
                 ' not a transparent pixel, so we need to close the rectangle and remove it from the regions
                 ' set up the rectangle to remove from the core region & remove it
                 SetRect tRect, xySet, Y, X, Y + 1
-                rgnA = CreateRectRgn(tRect.Left, tRect.Top, tRect.Right, tRect.Bottom)
+                rgnA = CreateRectRgn(tRect.left, tRect.top, tRect.Right, tRect.Bottom)
                 CombineRgn rtnRgn, rtnRgn, rgnA, RGN_DIFF
                 DeleteObject rgnA
                 ' create a 1 pixel inner border region between outer edge & image
                 ' we do this by expanding the rectangle to be removed thereby creating a
                 ' smaller overall region
                 InflateRect tRect, 1, 1
-                rgnA = CreateRectRgn(tRect.Left, tRect.Top, tRect.Right, tRect.Bottom)
+                rgnA = CreateRectRgn(tRect.left, tRect.top, tRect.Right, tRect.Bottom)
                 CombineRgn ButtonDC.ClipBorder, ButtonDC.ClipBorder, rgnA, RGN_DIFF
                 DeleteObject rgnA
                 ' used if shaped button has a border or used as check box/option button
                 ' create another 1 clipping region for the actual image/background
                 InflateRect tRect, 1, 1
-                rgnA = CreateRectRgn(tRect.Left, tRect.Top, tRect.Right, tRect.Bottom)
+                rgnA = CreateRectRgn(tRect.left, tRect.top, tRect.Right, tRect.Bottom)
                 CombineRgn ButtonDC.ClipRgn, ButtonDC.ClipRgn, rgnA, RGN_DIFF
                 DeleteObject rgnA
                 xySet = -1      ' reset flag to look for another rectangle to be removed
@@ -2433,13 +2217,7 @@ Private Sub NormalizeImage(newSizeX As Long, newSizeY As Long, rtnRgn As Long)
 
 End Sub
 
-Private Sub DrawTransparentBitmap(lHDCdest As Long, _
-                                  destRect As RECT, _
-                                  lBMPsource As Long, _
-                                  bmpRect As RECT, _
-                                  Optional lMaskColor As Long = -1, _
-                                  Optional lNewBmpCx As Long, _
-                                  Optional lNewBmpCy As Long)
+Private Sub DrawTransparentBitmap(lHDCdest As Long, destRect As RECT, lBMPsource As Long, bmpRect As RECT, Optional lMaskColor As Long = -1, Optional lNewBmpCx As Long, Optional lNewBmpCy As Long)
 
     Const DSna = &H220326 '0x00220326
 
@@ -2469,11 +2247,11 @@ Private Sub DrawTransparentBitmap(lHDCdest As Long, _
     srcX = myImage.TransSize.X ' lNewBmpCx                  'Get width of bitmap
     srcY = myImage.TransSize.Y ' lNewBmpCy                'Get height of bitmap
         
-    If bmpRect.Right = 0 Then bmpRect.Right = srcX Else srcX = bmpRect.Right - bmpRect.Left
-    If bmpRect.Bottom = 0 Then bmpRect.Bottom = srcY Else srcY = bmpRect.Bottom - bmpRect.Top
+    If bmpRect.Right = 0 Then bmpRect.Right = srcX Else srcX = bmpRect.Right - bmpRect.left
+    If bmpRect.Bottom = 0 Then bmpRect.Bottom = srcY Else srcY = bmpRect.Bottom - bmpRect.top
         
-    If (destRect.Right) = 0 Then X = lNewBmpCx Else X = (destRect.Right - destRect.Left)
-    If (destRect.Bottom) = 0 Then Y = lNewBmpCy Else Y = (destRect.Bottom - destRect.Top)
+    If (destRect.Right) = 0 Then X = lNewBmpCx Else X = (destRect.Right - destRect.left)
+    If (destRect.Bottom) = 0 Then Y = lNewBmpCy Else Y = (destRect.Bottom - destRect.top)
     If lNewBmpCx > X Or lNewBmpCy > Y Then
         lRatio(0) = (X / lNewBmpCx)
         lRatio(1) = (Y / lNewBmpCy)
@@ -2508,14 +2286,14 @@ Private Sub DrawTransparentBitmap(lHDCdest As Long, _
     hPalMem = SelectPalette(lHDCMem, 0, True)
     RealizePalette lHDCMem
     
-    BitBlt lHDCMem, 0&, 0&, X, Y, lHDCdest, destRect.Left, destRect.Top, vbSrcCopy
+    BitBlt lHDCMem, 0&, 0&, X, Y, lHDCdest, destRect.left, destRect.top, vbSrcCopy
     
     hPalOld = SelectPalette(lHDCcolor, 0, True)
     RealizePalette lHDCcolor
     SetBkColor lHDCcolor, GetBkColor(lHDCsrc)
     SetTextColor lHDCcolor, GetTextColor(lHDCsrc)
     
-    BitBlt lHDCcolor, 0&, 0&, srcX, srcY, lHDCsrc, bmpRect.Left, bmpRect.Top, vbSrcCopy
+    BitBlt lHDCcolor, 0&, 0&, srcX, srcY, lHDCsrc, bmpRect.left, bmpRect.top, vbSrcCopy
     
     SetBkColor lHDCcolor, lMask2Use
     SetTextColor lHDCcolor, vbWhite
@@ -2530,7 +2308,7 @@ Private Sub DrawTransparentBitmap(lHDCdest As Long, _
     
     StretchBlt lHDCMem, 0&, 0&, lNewBmpCx, lNewBmpCy, lHDCcolor, 0, 0, srcX, srcY, vbSrcPaint
     
-    BitBlt lHDCdest, destRect.Left, destRect.Top, X, Y, lHDCMem, 0&, 0&, vbSrcCopy
+    BitBlt lHDCdest, destRect.left, destRect.top, X, Y, lHDCMem, 0&, 0&, vbSrcCopy
     
     'Delete memory bitmaps & DCs
     DeleteObject SelectObject(lHDCcolor, lBmColorOld)
@@ -2548,7 +2326,7 @@ Private Sub DrawButtonIcon(iRect As RECT)
     ' Routine will draw the button image
 
     If (myImage.SourceSize.X + myImage.SourceSize.Y) = 0 Then Exit Sub
-    If myImage.TransImage = 0 Then NormalizeImage iRect.Right - iRect.Left, iRect.Bottom - iRect.Top, 0
+    If myImage.TransImage = 0 Then NormalizeImage iRect.Right - iRect.left, iRect.Bottom - iRect.top, 0
 
     Dim imgWidth As Long, imgHeight As Long
 
@@ -2563,8 +2341,8 @@ Private Sub DrawButtonIcon(iRect As RECT)
 
     End If
     
-    imgWidth = iRect.Right - iRect.Left
-    imgHeight = iRect.Bottom - iRect.Top
+    imgWidth = iRect.Right - iRect.left
+    imgHeight = iRect.Bottom - iRect.top
     ' destination rectangle for drawing on the DC
     dRect = iRect
 
@@ -2578,21 +2356,21 @@ Private Sub DrawButtonIcon(iRect As RECT)
 
         Dim hOldBrush     As Long
 
-        Dim hOldBackColor As Long, hbrShadow As Long, hbrHilite As Long
+        Dim hOldBackColor As Long, hbrShadow As Long
     
         ' Create a temporary DC and bitmap to hold the image
         hMemDC = CreateCompatibleDC(ButtonDC.hdc)
         hBitmap = CreateCompatibleBitmap(ButtonDC.hdc, imgWidth, imgHeight)
         hOldBitmap = SelectObject(hMemDC, hBitmap)
         PatBlt hMemDC, 0, 0, imgWidth, imgHeight, WHITENESS
-        OffsetRect dRect, -dRect.Left, -dRect.Top
+        OffsetRect dRect, -dRect.left, -dRect.top
 
     End If
     
     If myImage.Type = CI_ICON Then
         '        ' draw icon directly onto the temporary DC
         '        ' for icons, we can draw directly on the destination DC
-        DrawIconEx hMemDC, dRect.Left, dRect.Top, myImage.Image.Handle, imgWidth, imgHeight, 0, 0, &H3
+        DrawIconEx hMemDC, dRect.left, dRect.top, myImage.Image.handle, imgWidth, imgHeight, 0, 0, &H3
     Else
         ' draw transparent bitmap onto the temporary DC
         DrawTransparentBitmap hMemDC, dRect, myImage.TransImage, rcImage, , imgWidth, imgHeight
@@ -2603,7 +2381,7 @@ Private Sub DrawButtonIcon(iRect As RECT)
         hOldBackColor = SetBkColor(ButtonDC.hdc, vbWhite)
         hbrShadow = CreateSolidBrush(vbGray)
         hOldBrush = SelectObject(ButtonDC.hdc, hbrShadow)
-        BitBlt ButtonDC.hdc, iRect.Left, iRect.Top, imgWidth, imgHeight, hMemDC, 0, 0, MAGICROP
+        BitBlt ButtonDC.hdc, iRect.left, iRect.top, imgWidth, imgHeight, hMemDC, 0, 0, MAGICROP
   
         SetBkColor ButtonDC.hdc, hOldBackColor
         SelectObject ButtonDC.hdc, hOldBrush
@@ -2616,11 +2394,7 @@ Private Sub DrawButtonIcon(iRect As RECT)
 
 End Sub
 
-Private Function ShadeColor(lColor As Long, _
-                            shadeOffset As Integer, _
-                            lessBlue As Boolean, _
-                            Optional bFocusRect As Boolean, _
-                            Optional bInvert As Boolean) As Long
+Private Function ShadeColor(lColor As Long, shadeOffset As Integer, lessBlue As Boolean, Optional bFocusRect As Boolean, Optional bInvert As Boolean) As Long
 
     ' Basically supply a value between -255 and +255. Positive numbers make
     ' the passed color lighter and negative numbers make the color darker
@@ -2694,10 +2468,10 @@ Private Sub GetGDIMetrics(sObject As String)
                 myImage.SourceSize.X = 0
                 myImage.SourceSize.Y = 0
             Else
-                GetGDIObject myImage.Image.Handle, LenB(bmpInfo), bmpInfo
+                GetGDIObject myImage.Image.handle, LenB(bmpInfo), bmpInfo
 
                 If bmpInfo.bmBits = 0 Then
-                    GetIconInfo myImage.Image.Handle, icoInfo
+                    GetIconInfo myImage.Image.handle, icoInfo
 
                     If icoInfo.hbmColor <> 0 Then
                         ' downside... API creates 2 bitmaps that we need to destroy since they aren't used in this
@@ -2759,10 +2533,10 @@ Private Function MoveButton() As Boolean
 
     Dim mRect As RECT, mPT As POINTAPI
 
-    GetWindowRect UserControl.hwnd, mRect
-    mPT.X = mRect.Left: mPT.Y = mRect.Top
+    GetWindowRect UserControl.hWnd, mRect
+    mPT.X = mRect.left: mPT.Y = mRect.top
     ScreenToClient Val(Tag), mPT
-    SetRect mRect, mPT.X, mPT.Y, (mRect.Right - mRect.Left), (mRect.Bottom - mRect.Top)
+    SetRect mRect, mPT.X, mPT.Y, (mRect.Right - mRect.left), (mRect.Bottom - mRect.top)
 
     If ((myProps.bStatus And 6) = 6) And ((myProps.bStatus And 1024) <> 1024) Then
 
@@ -2786,7 +2560,7 @@ Private Function MoveButton() As Boolean
 
         End Select
 
-        MoveWindow UserControl.hwnd, mRect.Left, mRect.Top, mRect.Right, mRect.Bottom, ByVal 1&
+        MoveWindow UserControl.hWnd, mRect.left, mRect.top, mRect.Right, mRect.Bottom, ByVal 1&
         myProps.bStatus = myProps.bStatus Or 1024
         GetSetOffDC False    ' copy the offscreen DC onto the control
         UserControl.Refresh
@@ -2815,7 +2589,7 @@ Private Function MoveButton() As Boolean
 
             End Select
 
-            MoveWindow UserControl.hwnd, mRect.Left, mRect.Top, mRect.Right, mRect.Bottom, ByVal 1&
+            MoveWindow UserControl.hWnd, mRect.left, mRect.top, mRect.Right, mRect.Bottom, ByVal 1&
             myProps.bStatus = myProps.bStatus And Not 1024
 
         End If
@@ -2824,11 +2598,7 @@ Private Function MoveButton() As Boolean
 
 End Function
 
-Private Sub DrawButtonBackground(bColor As Long, _
-                                 ActiveStatus As Integer, _
-                                 ActiveRegion As Integer, _
-                                 Optional bGradientColor As Long = -1, _
-                                 Optional bHoverColor As Long = -1)
+Private Sub DrawButtonBackground(bColor As Long, ActiveStatus As Integer, ActiveRegion As Integer, Optional bGradientColor As Long = -1, Optional bHoverColor As Long = -1)
                 
     ' Fill the button with the appropriate backcolor
 
@@ -2836,7 +2606,7 @@ Private Sub DrawButtonBackground(bColor As Long, _
 
     If ActiveRegion = 0 Then Exit Sub
 
-    Dim i           As Integer, bColor2Use As Long, rtnVal As Integer
+    Dim i           As Integer, bColor2Use As Long
 
     Dim focusOffset As Byte, isDown As Byte
 
@@ -2937,7 +2707,7 @@ Private Sub DrawCustomBorders(ActiveRegion As Integer)
 
                     If (myProps.bShape = lv_RoundFlat And bTimerActive) Or myProps.bShape = lv_CustomFlat Then
                         tRegion = CreateRectRgn(0, 0, 0, 0)
-                        GetWindowRgn UserControl.hwnd, tRegion
+                        GetWindowRgn UserControl.hWnd, tRegion
 
                         If myProps.bShape = lv_RoundFlat Then
                             tBrush = CreateSolidBrush(0)
@@ -2963,7 +2733,7 @@ Private Sub DrawCustomBorders(ActiveRegion As Integer)
 
             If myProps.bValue = False And (myProps.bShape = lv_RoundFlat Or myProps.bShape = lv_CustomFlat) Then
                 tRegion = CreateRectRgn(0, 0, 0, 0)
-                GetWindowRgn UserControl.hwnd, tRegion
+                GetWindowRgn UserControl.hWnd, tRegion
 
                 If myProps.bShape = lv_CustomFlat Then
                     tBrush = CreateSolidBrush(ConvertColor(curBackColor))
@@ -2990,14 +2760,11 @@ Private Sub DrawCustomBorders(ActiveRegion As Integer)
 
 End Sub
 
-Private Sub DrawButtonBorder(polyPts() As POINTAPI, _
-                             polyColors() As Long, _
-                             ActiveStatus As Integer, _
-                             Optional OuterBorderStyle As Long = -1)
+Private Sub DrawButtonBorder(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, Optional OuterBorderStyle As Long = -1)
 
     ' This routine draws the border depending on the button style
 
-    Dim i            As Integer, j As Integer, xColorRef As Integer
+    Dim i            As Integer, xColorRef As Integer
 
     Dim lBorderStyle As Long, lastColor As Long
 
@@ -3068,14 +2835,9 @@ Private Sub DrawButtonBorder(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawFocusRectangle(fColor As Long, _
-                               bSolid As Boolean, _
-                               bOnText As Boolean, _
-                               polyPts() As POINTAPI)
+Private Sub DrawFocusRectangle(fColor As Long, bSolid As Boolean, bOnText As Boolean, polyPts() As POINTAPI)
 
     ' Draws focus rectangles for the button style & button mode
-
-    Dim tRgn        As Long, hBrush As Long
 
     Dim focusOffset As Byte, bDownOffset As Byte
 
@@ -3119,18 +2881,18 @@ Private Sub DrawFocusRectangle(fColor As Long, _
 
             End If
 
-            If myProps.bRect.Left > 4 + myProps.bSegPts.X And myProps.bRect.Right < myProps.bSegPts.Y - 4 Then focusOffset = 2 Else focusOffset = 1
+            If myProps.bRect.left > 4 + myProps.bSegPts.X And myProps.bRect.Right < myProps.bSegPts.Y - 4 Then focusOffset = 2 Else focusOffset = 1
             bDownOffset = Abs((((myProps.bStatus And 6) = 6) Or myProps.bValue = True) And myProps.bBackStyle <> 3)
             OffsetRect fRect, -focusOffset + bDownOffset * Abs(myProps.bShape < lv_Round3D), -focusOffset + bDownOffset
             fRect.Right = fRect.Right + focusOffset * 2 + bDownOffset * Abs(myProps.bShape < lv_Round3D)
             fRect.Bottom = fRect.Bottom + focusOffset * 2 + bDownOffset
 
             If bSolid Then   ' for now, only used on Java buttons & round buttons
-                polyPts(0).X = fRect.Left: polyPts(0).Y = fRect.Top
-                polyPts(1).X = fRect.Right - 1: polyPts(1).Y = fRect.Top
+                polyPts(0).X = fRect.left: polyPts(0).Y = fRect.top
+                polyPts(1).X = fRect.Right - 1: polyPts(1).Y = fRect.top
                 polyPts(2).X = fRect.Right - 1: polyPts(2).Y = fRect.Bottom - 1
-                polyPts(3).X = fRect.Left: polyPts(3).Y = fRect.Bottom - 1
-                polyPts(4).X = fRect.Left: polyPts(4).Y = fRect.Top
+                polyPts(3).X = fRect.left: polyPts(3).Y = fRect.Bottom - 1
+                polyPts(4).X = fRect.left: polyPts(4).Y = fRect.top
                 Polyline ButtonDC.hdc, polyPts(0), 5
             Else            ' for now, only used on Macintosh buttons
                 DrawFocusRect ButtonDC.hdc, fRect
@@ -3142,11 +2904,11 @@ Private Sub DrawFocusRectangle(fColor As Long, _
             OffsetRect fRect, 4 + myProps.bSegPts.X, 4
 
             If bSolid Then ' used when option buttons/checkboxes have focus if Value=True
-                polyPts(0).X = fRect.Left: polyPts(0).Y = fRect.Bottom
-                polyPts(1).X = fRect.Left: polyPts(1).Y = fRect.Top
-                polyPts(2).X = fRect.Right: polyPts(2).Y = fRect.Top
+                polyPts(0).X = fRect.left: polyPts(0).Y = fRect.Bottom
+                polyPts(1).X = fRect.left: polyPts(1).Y = fRect.top
+                polyPts(2).X = fRect.Right: polyPts(2).Y = fRect.top
                 polyPts(3).X = fRect.Right: polyPts(3).Y = fRect.Bottom
-                polyPts(4).X = fRect.Left: polyPts(4).Y = fRect.Bottom
+                polyPts(4).X = fRect.left: polyPts(4).Y = fRect.Bottom
                 SetButtonColors True, ButtonDC.hdc, cObj_Pen, fColor
                 Polyline ButtonDC.hdc, polyPts(0), 5
             Else
@@ -3160,10 +2922,7 @@ Private Sub DrawFocusRectangle(fColor As Long, _
 
 End Sub
 
-Private Sub DrawCaptionIcon(bColor As Long, _
-                            Optional tColorDisabled As Long = -1, _
-                            Optional bOffsetTextDown As Boolean = False, _
-                            Optional bSingleDisableColor As Boolean = False)
+Private Sub DrawCaptionIcon(bColor As Long, Optional tColorDisabled As Long = -1, Optional bOffsetTextDown As Boolean = False, Optional bSingleDisableColor As Boolean = False)
 
     ' Routine draws the caption & calls the DrawButtonIcon routine
 
@@ -3304,7 +3063,7 @@ Private Sub DrawGradient(ByVal Color1 As Long, ByVal Color2 As Long)
     For i = 0 To PixelStep - 1
 
         If myProps.bGradient Mod 2 Then rIndex = i Else rIndex = PixelStep - i - 1
-        DrawRect ButtonDC.hdc, mRect.Left, mRect.Top, mRect.Right, mRect.Bottom, Colors(rIndex)
+        DrawRect ButtonDC.hdc, mRect.left, mRect.top, mRect.Right, mRect.Bottom, Colors(rIndex)
 
         If myProps.bGradient > 2 Then
             OffsetRect mRect, 0, rctOffset
@@ -3317,9 +3076,7 @@ Private Sub DrawGradient(ByVal Color1 As Long, ByVal Color2 As Long)
 
 End Sub
 
-Private Sub LoadGradientColors(Colors() As Long, _
-                               ByVal Color1 As Long, _
-                               ByVal Color2 As Long)
+Private Sub LoadGradientColors(Colors() As Long, ByVal Color1 As Long, ByVal Color2 As Long)
 
     Dim i              As Integer, j As Integer
 
@@ -3372,20 +3129,20 @@ Private Sub UserControl_AmbientChanged(PropertyName As String)
 
         Case "DisplayAsDefault" 'changing focus
 
-            If ambient.DisplayAsDefault = True And (myProps.bShowFocus = True Or Not ambient.UserMode) Then
+            If Ambient.DisplayAsDefault = True And (myProps.bShowFocus = True Or Not Ambient.UserMode) Then
                 myProps.bStatus = myProps.bStatus Or 1
             Else
                 myProps.bStatus = myProps.bStatus And Not 1
 
             End If
 
-            If myProps.bShape > lv_RoundFlat And Not ambient.UserMode Then bTimerActive = ((myProps.bStatus And 1) = 1)
+            If myProps.bShape > lv_RoundFlat And Not Ambient.UserMode Then bTimerActive = ((myProps.bStatus And 1) = 1)
             RedrawButton
 
-            If myProps.bShape > lv_RoundFlat And Not ambient.UserMode Then bTimerActive = False
+            If myProps.bShape > lv_RoundFlat And Not Ambient.UserMode Then bTimerActive = False
 
         Case "BackColor"
-            cParentBC = ConvertColor(ambient.BackColor)
+            cParentBC = ConvertColor(Ambient.BackColor)
 
             If myProps.bShape > lv_FullDiagonal Or myProps.bBackStyle = 5 Then RedrawButton
 
@@ -3504,10 +3261,7 @@ Private Sub UserControl_KeyUp(KeyCode As Integer, Shift As Integer)
 
 End Sub
 
-Private Sub UserControl_MouseDown(Button As Integer, _
-                                  Shift As Integer, _
-                                  X As Single, _
-                                  Y As Single)
+Private Sub UserControl_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
 
     ' Only allow left clicks to fire a click event
 
@@ -3522,7 +3276,7 @@ Private Sub UserControl_MouseDown(Button As Integer, _
         RedrawButton
         ' we need this in case the user clicks & drags mouse off of the control
         ' Without it, we may never get the mouse up event
-        SetCapture UserControl.hwnd
+        SetCapture UserControl.hWnd
 
     End If
 
@@ -3530,10 +3284,7 @@ Private Sub UserControl_MouseDown(Button As Integer, _
 
 End Sub
 
-Private Sub UserControl_MouseMove(Button As Integer, _
-                                  Shift As Integer, _
-                                  X As Single, _
-                                  Y As Single)
+Private Sub UserControl_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
 
     ' Here we may fire 2 events: MouseMove & MouseOnButton
 
@@ -3553,7 +3304,7 @@ Private Sub UserControl_MouseMove(Button As Integer, _
 
     GetCursorPos mousePt
 
-    If WindowFromPoint(mousePt.X, mousePt.Y) <> UserControl.hwnd Then GoTo RaiseTheMouseEvent
+    If WindowFromPoint(mousePt.X, mousePt.Y) <> UserControl.hWnd Then GoTo RaiseTheMouseEvent
 
     'If x < 0 Or y < 0 Or x > ScaleWidth Or y > ScaleHeight Then GoTo RaiseTheMouseEvent
 
@@ -3571,10 +3322,10 @@ Private Sub UserControl_MouseMove(Button As Integer, _
     ' button while the mouse is over it. For instance, you can supply a different
     ' image/font/etc & replace it when the mouse leaves the button area
 
-    SetProp UserControl.hwnd, "lv_ClassID", ObjPtr(Me)
+    SetProp UserControl.hWnd, "lv_ClassID", ObjPtr(Me)
     ' the next line is used with expandability in mind. May use multiple timers in future upgrade
-    SetProp UserControl.hwnd, "lv_TimerID", 237
-    SetTimer UserControl.hwnd, 237, 50, AddressOf lv_TimerCallBack
+    SetProp UserControl.hWnd, "lv_TimerID", 237
+    SetTimer UserControl.hWnd, 237, 50, AddressOf lv_TimerCallBack
     bTimerActive = True                         ' flag used for drawing
     bNoRefresh = False                         ' ensure flag is reset
 
@@ -3586,10 +3337,7 @@ RaiseTheMouseEvent:
 
 End Sub
 
-Private Sub UserControl_MouseUp(Button As Integer, _
-                                Shift As Integer, _
-                                X As Single, _
-                                Y As Single)
+Private Sub UserControl_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
 
     ' The only tweak here is to trigger a fake click event if user
     ' double clicked on this button
@@ -3640,7 +3388,7 @@ Private Sub UserControl_DblClick()
     ' another plus... other button routines out there may not pass the
     ' true X,Y coordinates when firing a fake 2nd click event
     GetCursorPos mousePt
-    ScreenToClient UserControl.hwnd, mousePt
+    ScreenToClient UserControl.hWnd, mousePt
     RaiseEvent DoubleClick(CInt(mButton))   ' added benefit/information
 
     If mButton = vbLeftButton Then
@@ -3678,24 +3426,13 @@ Private Sub UserControl_OLECompleteDrag(Effect As Long)
 
 End Sub
 
-Private Sub UserControl_OLEDragDrop(Data As DataObject, _
-                                    Effect As Long, _
-                                    Button As Integer, _
-                                    Shift As Integer, _
-                                    X As Single, _
-                                    Y As Single)
+Private Sub UserControl_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     ' not used by me, but we'll send the event
     RaiseEvent OLEDragDrop(Data, Effect, Button, Shift, X, Y)
 
 End Sub
 
-Private Sub UserControl_OLEDragOver(Data As DataObject, _
-                                    Effect As Long, _
-                                    Button As Integer, _
-                                    Shift As Integer, _
-                                    X As Single, _
-                                    Y As Single, _
-                                    State As Integer)
+Private Sub UserControl_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single, State As Integer)
     ' not used by me, but we'll send the event
     RaiseEvent OLEDragOver(Data, Effect, Button, Shift, X, Y, State)
 
@@ -3736,7 +3473,7 @@ Private Sub UserControl_InitProperties()
     Tag = UserControl.ContainerHwnd
 
     With myProps
-        .bCaption = ambient.DisplayName
+        .bCaption = Ambient.DisplayName
         .bCaptionAlign = vbCenter
         .bShowFocus = True
         .bForeHover = vbButtonText
@@ -3750,7 +3487,7 @@ Private Sub UserControl_InitProperties()
 
     On Error GoTo 0
 
-    cParentBC = ConvertColor(ambient.BackColor)
+    cParentBC = ConvertColor(Ambient.BackColor)
     curBackColor = vbButtonFace         ' this will be the button's initial backcolor
     GetGDIMetrics "BackColor"
     PropertyChanged "Caption"
@@ -3767,7 +3504,7 @@ Private Sub UserControl_ReadProperties(PropBag As PropertyBag)
     ' Write properties
 
     Tag = UserControl.ContainerHwnd
-    cParentBC = ConvertColor(ambient.BackColor)
+    cParentBC = ConvertColor(Ambient.BackColor)
     DelayDrawing True
 
     With PropBag
@@ -3814,8 +3551,8 @@ Private Sub UserControl_Show()
 
     ' interesting, NT won't send the DisplayAsDefault (while in IDE) until after the button is shown
     ' Win98 fires this regardless. So fix is to put the test here also.
-    If ambient.UserMode = False Then
-        If ambient.DisplayAsDefault = True And myProps.bShowFocus = True Then
+    If Ambient.UserMode = False Then
+        If Ambient.DisplayAsDefault = True And myProps.bShowFocus = True Then
             myProps.bStatus = myProps.bStatus Or 1
             RedrawButton
 
@@ -3888,7 +3625,7 @@ Private Sub UserControl_Terminate()
     ' Button is ending, let's clean up
 
     ' should never happen that we have a timer left over; but just in case
-    If bTimerActive Then KillTimer UserControl.hwnd, 1
+    If bTimerActive Then KillTimer UserControl.hWnd, 1
 
     ' circular/custom buttons have clipping regions, kill them too
     If ButtonDC.ClipRgn Then DeleteObject ButtonDC.ClipRgn
@@ -3910,10 +3647,7 @@ Private Sub UserControl_Terminate()
 
 End Sub
 
-Private Sub DrawButton_Win95(polyPts() As POINTAPI, _
-                             polyColors() As Long, _
-                             ActiveStatus As Integer, _
-                             lastClipRgn As Integer)
+Private Sub DrawButton_Win95(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
@@ -3922,7 +3656,7 @@ Private Sub DrawButton_Win95(polyPts() As POINTAPI, _
 
     Dim midShade As Long, darkShade As Long, liteShade As Long, backShade As Long
 
-    Dim lColor   As Long, fRect As RECT, i As Integer
+    Dim lColor   As Long
 
     If myProps.bMode = lv_CommandButton Or myProps.bValue = False Then
         backShade = adjBackColorUp
@@ -3998,10 +3732,7 @@ Private Sub DrawButton_Win95(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_Win31(polyPts() As POINTAPI, _
-                             polyColors() As Long, _
-                             ActiveStatus As Integer, _
-                             lastClipRgn As Integer)
+Private Sub DrawButton_Win31(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
@@ -4084,17 +3815,14 @@ Private Sub DrawButton_Win31(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_WinXP(polyPts() As POINTAPI, _
-                             polyColors() As Long, _
-                             ActiveStatus As Integer, _
-                             lastClipRgn As Integer)
+Private Sub DrawButton_WinXP(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
     ' a simple Exit Sub
     '==========================================================================
 
-    Dim backShade As Long, darkShade As Long, liteShade As Long, midShade As Long
+    Dim backShade As Long, liteShade As Long
 
     Dim i         As Integer, lColor As Long
 
@@ -4214,10 +3942,7 @@ Private Sub DrawButton_WinXP(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_Macintosh(polyPts() As POINTAPI, _
-                                 polyColors() As Long, _
-                                 ActiveStatus As Integer, _
-                                 lastClipRgn As Integer)
+Private Sub DrawButton_Macintosh(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
@@ -4361,10 +4086,7 @@ Private Sub DrawButton_Macintosh(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_Flat(polyPts() As POINTAPI, _
-                            polyColors() As Long, _
-                            ActiveStatus As Integer, _
-                            lastClipRgn As Integer)
+Private Sub DrawButton_Flat(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
@@ -4435,10 +4157,7 @@ Private Sub DrawButton_Flat(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_Hover(polyPts() As POINTAPI, _
-                             polyColors() As Long, _
-                             ActiveStatus As Integer, _
-                             lastClipRgn As Integer)
+Private Sub DrawButton_Hover(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
@@ -4469,7 +4188,7 @@ Private Sub DrawButton_Hover(polyPts() As POINTAPI, _
 
     DrawCaptionIcon backShade, lColor, myProps.bValue = True, myProps.bMode > lv_CommandButton
 
-    If myProps.bShape > lv_FullDiagonal And UserControl.ambient.UserMode = False And myProps.bShape < lv_CustomFlat Then
+    If myProps.bShape > lv_FullDiagonal And UserControl.Ambient.UserMode = False And myProps.bShape < lv_CustomFlat Then
         SelectClipRgn ButtonDC.hdc, 0
         SetButtonColors True, ButtonDC.hdc, cObj_Pen, ShadeColor(cParentBC, -&H20, False), , , , 2
         Arc ButtonDC.hdc, 0, 0, ScaleWidth - 1, ScaleHeight - 1, 0, 0, 0, 0
@@ -4491,7 +4210,7 @@ Private Sub DrawButton_Hover(polyPts() As POINTAPI, _
                 polyColors(12) = polyColors(11)
             Else
 
-                If ambient.UserMode = False Then
+                If Ambient.UserMode = False Then
                     lColor = ShadeColor(cParentBC, -&H40, False)
 
                     If lColor = vbBlack Then lColor = vbWhite
@@ -4506,7 +4225,7 @@ Private Sub DrawButton_Hover(polyPts() As POINTAPI, _
 
             End If
         
-            DrawButtonBorder polyPts(), polyColors(), ActiveStatus, Abs(UserControl.ambient.UserMode = False) * 2
+            DrawButtonBorder polyPts(), polyColors(), ActiveStatus, Abs(UserControl.Ambient.UserMode = False) * 2
 
         End If
 
@@ -4523,10 +4242,7 @@ Private Sub DrawButton_Hover(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_Netscape(polyPts() As POINTAPI, _
-                                polyColors() As Long, _
-                                ActiveStatus As Integer, _
-                                lastClipRgn As Integer)
+Private Sub DrawButton_Netscape(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with
@@ -4596,10 +4312,7 @@ Private Sub DrawButton_Netscape(polyPts() As POINTAPI, _
 
 End Sub
 
-Private Sub DrawButton_Java(polyPts() As POINTAPI, _
-                            polyColors() As Long, _
-                            ActiveStatus As Integer, _
-                            lastClipRgn As Integer)
+Private Sub DrawButton_Java(polyPts() As POINTAPI, polyColors() As Long, ActiveStatus As Integer, lastClipRgn As Integer)
     '==========================================================================
     ' If not used in your project, replace this entire routine from the
     ' Dim statements to the last line before the End Sub with

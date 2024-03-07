@@ -1,95 +1,42 @@
 Attribute VB_Name = "Application"
+'**************************************************************
+' Application.bas - General API methods regarding the Application in general.
+'**************************************************************
+
+'**************************************************************************
+'This program is free software; you can redistribute it and/or modify
+'it under the terms of the Affero General Public License;
+'either version 1 of the License, or any later version.
+'
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'Affero General Public License for more details.
+'
+'You should have received a copy of the Affero General Public License
+'along with this program; if not, you can find it at http://www.affero.org/oagpl.html
+'**************************************************************************
+
+
 Option Explicit
-'**********************************************************************************************************************************************************
-'En este modulo vamos a meter TODAS las declaraciones de API y funciones que tengan que ver excluxivamente con la interaccion entre Windows y nuestra app.
-'**********************************************************************************************************************************************************
 
-'***************************************
-'Para obetener memoria libre en la RAM
-'***************************************
-Private pUdtMemStatus As MEMORYSTATUS
+''
+' Retrieves the active window's hWnd for this app.
+'
+' @return Retrieves the active window's hWnd for this app. If this app is not in the foreground it returns 0.
 
-Private Type MEMORYSTATUS
+Private Declare Function GetActiveWindow Lib "user32" () As Long
 
-    dwLength As Long
-    dwMemoryLoad As Long
-    dwTotalPhys As Long
-    dwAvailPhys As Long
-    dwTotalPageFile As Long
-    dwAvailPageFile As Long
-    dwTotalVirtual As Long
-    dwAvailVirtual As Long
+''
+' Checks if this is the active (foreground) application or not.
+'
+' @return   True if any of the app's windows are the foreground window, false otherwise.
 
-End Type
-Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
-
-'***********************************************************
-' Obtener informacion del adaptador de video y resolucion.
-'***********************************************************
-
-Public Type typDevMODE
-
-    dmDeviceName       As String * 32
-    dmSpecVersion      As Integer
-    dmDriverVersion    As Integer
-    dmSize             As Integer
-    dmDriverExtra      As Integer
-    dmFields           As Long
-    dmOrientation      As Integer
-    dmPaperSize        As Integer
-    dmPaperLength      As Integer
-    dmPaperWidth       As Integer
-    dmScale            As Integer
-    dmCopies           As Integer
-    dmDefaultSource    As Integer
-    dmPrintQuality     As Integer
-    dmColor            As Integer
-    dmDuplex           As Integer
-    dmYResolution      As Integer
-    dmTTOption         As Integer
-    dmCollate          As Integer
-    dmFormName         As String * 32
-    dmUnusedPadding    As Integer
-    dmBitsPerPel       As Integer
-    dmPelsWidth        As Long
-    dmPelsHeight       As Long
-    dmDisplayFlags     As Long
-    dmDisplayFrequency As Long
-
-End Type
-Public Declare Function EnumDisplaySettings Lib "user32" Alias "EnumDisplaySettingsA" (ByVal lpszDeviceName As Long, ByVal iModeNum As Long, lptypDevMode As Any) As Boolean
-Public Declare Function ChangeDisplaySettings Lib "user32" Alias "ChangeDisplaySettingsA" (lptypDevMode As Any, ByVal dwFlags As Long) As Long
-
-'*********************************************************************
-'Funciones que manejan la memoria
-'*********************************************************************
-
-Public Function General_Bytes_To_Megabytes(Bytes As Double) As Double
-
-    Dim dblAns As Double
-        dblAns = (Bytes / 1024) / 1024
-        
-    General_Bytes_To_Megabytes = Format(dblAns, "###,###,##0.00")
-
+Public Function IsAppActive() As Boolean
+'***************************************************
+'Author: Juan Martín Sotuyo Dodero (maraxus)
+'Last Modify Date: 03/03/2007
+'Checks if this is the active application or not
+'***************************************************
+    IsAppActive = (GetActiveWindow <> 0)
 End Function
-
-Public Function General_GetFreeRam() As Double
-
-    Call GlobalMemoryStatus(pUdtMemStatus)
-    
-    'Return Value in Megabytes
-    Dim dblAns As Double
-        dblAns = pUdtMemStatus.dwAvailPhys
-    
-    General_GetFreeRam = General_Bytes_To_Megabytes(dblAns)
-
-End Function
-
-Public Function General_GetFreeRam_Bytes() As Long
-    
-    Call GlobalMemoryStatus(pUdtMemStatus)
-    
-    General_GetFreeRam_Bytes = pUdtMemStatus.dwAvailPhys
-
-End Function
-

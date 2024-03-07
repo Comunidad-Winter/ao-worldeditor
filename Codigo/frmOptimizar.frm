@@ -170,7 +170,7 @@ Private Sub Optimizar()
             End If
 
             ' ** Quitar Translados y Triggers en Bloqueo
-            If MapData(X, Y).blocked = 1 Then
+            If MapData(X, Y).Blocked = 1 Then
                 If MapData(X, Y).TileExit.Map > 0 And chkQuitarTrans.value = 1 Then ' Quita Translado Bloqueado
                     MapData(X, Y).TileExit.Map = 0
                     MapData(X, Y).TileExit.Y = 0
@@ -199,7 +199,7 @@ Private Sub Optimizar()
                     Case 4, 8, 10, 22 ' Arboles, Carteles, Foros, Yacimientos
 
                         If MapData(X, Y).Graphic(3).GrhIndex <> MapData(X, Y).ObjGrh.GrhIndex And chkMapearArbolesEtc.value = 1 Then MapData(X, Y).Graphic(3) = MapData(X, Y).ObjGrh
-                        If chkBloquearArbolesEtc.value = 1 And MapData(X, Y).blocked = 0 Then MapData(X, Y).blocked = 1
+                        If chkBloquearArbolesEtc.value = 1 And MapData(X, Y).Blocked = 0 Then MapData(X, Y).Blocked = 1
 
                 End Select
 

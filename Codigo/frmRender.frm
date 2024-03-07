@@ -1,75 +1,91 @@
 VERSION 5.00
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "Mscomctl.ocx"
 Begin VB.Form frmRender 
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   8535
-   ClientLeft      =   15
-   ClientTop       =   60
-   ClientWidth     =   8760
-   ClipControls    =   0   'False
-   ControlBox      =   0   'False
-   Icon            =   "frmRender.frx":0000
+   Caption         =   "Renderizado"
+   ClientHeight    =   1575
+   ClientLeft      =   45
+   ClientTop       =   435
+   ClientWidth     =   7455
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   569
+   ScaleHeight     =   105
    ScaleMode       =   3  'Pixel
-   ScaleWidth      =   584
-   StartUpPosition =   1  'CenterOwner
-   Begin VB.CommandButton Command1 
-      Caption         =   "Salir"
-      BeginProperty Font 
-         Name            =   "Arial"
-         Size            =   12
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   315
-      Left            =   7080
-      TabIndex        =   3
-      Top             =   120
-      Width           =   1215
+   ScaleWidth      =   497
+   StartUpPosition =   3  'Windows Default
+   Begin VB.PictureBox picMap 
+      AutoRedraw      =   -1  'True
+      Height          =   855
+      Left            =   120
+      ScaleHeight     =   53
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   117
+      TabIndex        =   7
+      Top             =   1680
+      Width           =   1815
+   End
+   Begin VB.CommandButton cmdCancelar 
+      Caption         =   "Cancelar"
+      Height          =   375
+      Left            =   1800
+      TabIndex        =   5
+      Top             =   1080
+      Width           =   1695
    End
    Begin VB.CommandButton cmdAceptar 
-      Caption         =   "Renderizar"
-      BeginProperty Font 
-         Name            =   "Arial"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   315
-      Left            =   240
-      TabIndex        =   1
+      Caption         =   "Aceptar"
+      Height          =   375
+      Left            =   3960
+      TabIndex        =   4
+      Top             =   1080
+      Width           =   1695
+   End
+   Begin VB.TextBox txtSize 
+      Height          =   285
+      Left            =   840
+      TabIndex        =   3
+      Text            =   "100"
       Top             =   120
-      Width           =   6615
+      Width           =   495
    End
-   Begin VB.PictureBox picMap 
-      Appearance      =   0  'Flat
-      AutoRedraw      =   -1  'True
-      BackColor       =   &H80000005&
-      BorderStyle     =   0  'None
-      ForeColor       =   &H80000008&
-      Height          =   7635
-      Left            =   360
-      ScaleHeight     =   509
-      ScaleMode       =   3  'Pixel
-      ScaleWidth      =   541
-      TabIndex        =   0
-      Top             =   600
-      Width           =   8115
-   End
-   Begin VB.Label lblmapa 
+   Begin MSComctlLib.ProgressBar pgbProgress 
       Height          =   255
-      Left            =   9120
+      Left            =   120
+      TabIndex        =   0
+      Top             =   720
+      Width           =   7215
+      _ExtentX        =   12726
+      _ExtentY        =   450
+      _Version        =   393216
+      Appearance      =   1
+   End
+   Begin VB.Label Label2 
+      AutoSize        =   -1  'True
+      Caption         =   "%"
+      Height          =   195
+      Left            =   1440
+      TabIndex        =   6
+      Top             =   120
+      Width           =   240
+   End
+   Begin VB.Label Label1 
+      AutoSize        =   -1  'True
+      Caption         =   "Tamano:"
+      Height          =   195
+      Left            =   120
       TabIndex        =   2
-      Top             =   0
-      Width           =   3375
+      Top             =   120
+      Width           =   630
+   End
+   Begin VB.Label lblEstado 
+      Alignment       =   2  'Center
+      Caption         =   "0%"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   1
+      Top             =   480
+      Width           =   7215
    End
 End
 Attribute VB_Name = "frmRender"
@@ -77,96 +93,28 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Explicit
-'*************************************************************
-' Capturar la imagen de controles
-       
-'  1 - Colocar un picturebox llamado picture1, un Command1 y un Command2 _
-   2 - Agragar algunos controles _
-   3 - Indicar en la Sub " Capturar_Imagen " .. el control a capturar
-'*************************************************************
-      
-' Declaraciones del Api
-      
-'*************************************************************
-' Función BitBlt para copiar la imagen del control en un picturebox
-Private Declare Function BitBlt _
-                Lib "gdi32" (ByVal hDestDC As Long, _
-                             ByVal X As Long, _
-                             ByVal Y As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal hSrcDC As Long, _
-                             ByVal xSrc As Long, _
-                             ByVal ySrc As Long, _
-                             ByVal dwRop As Long) As Long
-      
-' Recupera la imagen del área del control
-Private Declare Function GetWindowDC Lib "user32" (ByVal hwnd As Long) As Long
+
+Public formatPic As eFormatPic
 
 Private Sub cmdAceptar_Click()
-    Call MapCapture(False, False)
+Dim Size As Long
+
+txtSize.Text = Replace(txtSize.Text, ",", ".")
+If Not IsNumeric(txtSize.Text) Then MsgBox "El tamano es invalido."
+
+Size = Val(txtSize.Text) * 3200 / 100
+Call MapCapture(formatPic, Size)
+Unload Me
 End Sub
 
-'*************************************************************
-' Sub que copia la imagen del control en un picturebox
-'*************************************************************
-Public Sub Capturar_Imagen(Control As Control, Destino As Object)
-          
-    Dim hdc             As Long
-    Dim Escala_Anterior As Integer
-    Dim Ancho           As Long
-    Dim Alto            As Long
-          
-    ' Para que se mantenga la imagen por si se repinta la ventana
-    Destino.AutoRedraw = True
-          
-    On Error Resume Next
-
-    ' Si da error es por que el control está dentro de un Frame _
-      ya que  los Frame no tiene  dicha propiedad
-    Escala_Anterior = Control.Container.ScaleMode
-          
-    If Err.Number = 438 Then
-        ' Si el control está en un Frame, convierte la escala
-        Ancho = ScaleX(Control.Width, vbTwips, vbPixels)
-        Alto = ScaleY(Control.Height, vbTwips, vbPixels)
-    Else
-        ' Si no cambia la escala del  contenedor a pixeles
-        Control.Container.ScaleMode = vbPixels
-        Ancho = Control.Width
-        Alto = Control.Height
-    End If
-          
-    ' limpia el error
-    On Error GoTo 0
-
-    ' Captura el área de pantalla correspondiente al control
-    hdc = GetWindowDC(Control.hwnd)
-    
-    ' Copia esa área al picturebox
-    If ToWorldMap2 Then
-        Call BitBlt(Destino.hdc, 0 - 50, 0 - 50, Ancho - 50, Alto - 50, hdc, 0, 0, vbSrcCopy)
-    Else
-        Call BitBlt(Destino.hdc, 0, 0, Ancho, Alto, hdc, 0, 0, vbSrcCopy)
-    End If
-    
-    ' Convierte la imagen anterior en un Mapa de bits
-    Destino.Picture = Destino.Image
-    
-    ' Borra la imagen ya que ahora usa el Picture
-    Call Destino.Cls
-          
-    On Error Resume Next
-
-    If Err.Number = 0 Then
-        ' Si el control no está en un  Frame, restaura la escala del contenedor
-        Control.Container.ScaleMode = Escala_Anterior
-    End If
-          
+Private Sub cmdCancelar_Click()
+Unload Me
 End Sub
 
-Private Sub Command1_Click()
-    Unload Me
+Private Sub txtSize_KeyPress(KeyAscii As Integer)
+If (Not IsNumeric(Chr$(KeyAscii))) And _
+    (KeyAscii <> 8) And _
+    (KeyAscii <> 44) And _
+    (KeyAscii <> 46) Then KeyAscii = 0
 End Sub
